@@ -1,0 +1,17 @@
+export const serviceTags = [
+  'Same Day Laundry',
+  'Dry Cleaning',
+  'Ironing Only',
+  'Express Laundry',
+  'Hotel Laundry',
+  'Airbnb Laundry',
+  'Large Loads',
+  'Pickup & Delivery',
+  'Eco-Friendly Cleaning',
+  'Curtain Cleaning',
+  'Duvet Cleaning',
+  'Suit Pressing',
+  'Wedding Dress Care',
+  'Leather Care',
+  'Shoe Cleaning',
+];
