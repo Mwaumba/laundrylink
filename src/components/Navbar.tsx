@@ -50,8 +50,8 @@ const Navbar = () => {
               Search
             </Button>
           </Link>
-          <Button variant="outline" size="sm">Log in</Button>
-          <Button size="sm">List Your Business</Button>
+          <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
+          <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
         </div>
 
         {/* Mobile toggle */}
@@ -88,8 +88,8 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="flex gap-2 pt-3">
-                <Button variant="outline" size="sm" className="flex-1">Log in</Button>
-                <Button size="sm" className="flex-1">List Your Business</Button>
+                <Link to="/auth" onClick={() => setIsOpen(false)}><Button variant="outline" size="sm" className="flex-1">Log in</Button></Link>
+                <Link to="/vendor/onboarding" onClick={() => setIsOpen(false)}><Button size="sm" className="flex-1">List Your Business</Button></Link>
               </div>
             </div>
           </motion.div>

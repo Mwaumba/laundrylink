@@ -7,6 +7,10 @@ import Index from "./pages/Index.tsx";
 import Browse from "./pages/Browse.tsx";
 import VendorProfile from "./pages/VendorProfile.tsx";
 import Neighborhoods from "./pages/Neighborhoods.tsx";
+import Auth from "./pages/Auth.tsx";
+import VendorOnboarding from "./pages/VendorOnboarding.tsx";
+import VendorOnboardingPending from "./pages/VendorOnboardingPending.tsx";
+import AdminDashboard from "./pages/AdminDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +26,10 @@ const App = () => (
           <Route path="/browse" element={<Browse />} />
           <Route path="/vendor/:slug" element={<VendorProfile />} />
           <Route path="/neighborhoods" element={<Neighborhoods />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
+          <Route path="/vendor/onboarding/pending" element={<VendorOnboardingPending />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
