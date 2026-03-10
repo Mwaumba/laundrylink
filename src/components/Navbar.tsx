@@ -50,8 +50,8 @@ const Navbar = () => {
               Search
             </Button>
           </Link>
-          <Button variant="outline" size="sm">Log in</Button>
-          <Button size="sm">List Your Business</Button>
+          <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
+          <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
         </div>
 
         {/* Mobile toggle */}
