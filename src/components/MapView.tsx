@@ -3,41 +3,24 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Vendor } from '@/types';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 
 interface MapViewProps {
   vendors: Vendor[];
   onVendorSelect?: (vendor: Vendor) => void;
 }
 
+const MAPBOX_TOKEN = 'pk.eyJ1IjoibXdhdW1iYSIsImEiOiJjbWloczc4Z3owZ2s0M2Rxc2diaW0xMjByIn0.-caL6iXLzJ_utwiLOPYGQg';
+
 const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
-  const [tokenLoaded, setTokenLoaded] = useState(false);
-  const [tokenError, setTokenError] = useState(false);
-
-  // Fetch Mapbox token from edge function
-  useEffect(() => {
-    const fetchToken = async () => {
-      try {
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        if (error || !data?.token) {
-          setTokenError(true);
-          return;
-        }
-        mapboxgl.accessToken = data.token;
-        setTokenLoaded(true);
-      } catch {
-        setTokenError(true);
-      }
-    };
-    fetchToken();
-  }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || map.current || !tokenLoaded) return;
+    if (!mapContainer.current || map.current) return;
+
+    mapboxgl.accessToken = MAPBOX_TOKEN;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -52,7 +35,7 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
       map.current?.remove();
       map.current = null;
     };
-  }, [tokenLoaded]);
+  }, []);
 
   useEffect(() => {
     if (!map.current) return;
@@ -97,18 +80,7 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
       vendors.forEach((v) => bounds.extend([v.lng, v.lat]));
       map.current.fitBounds(bounds, { padding: 60 });
     }
-  }, [vendors, onVendorSelect, tokenLoaded]);
-
-  if (tokenError) {
-    return (
-      <div className="flex h-full items-center justify-center rounded-xl bg-muted/80">
-        <div className="rounded-xl bg-card p-6 text-center shadow-lg">
-          <p className="font-display font-bold text-foreground">Map Unavailable</p>
-          <p className="mt-1 text-sm text-muted-foreground">Mapbox token could not be loaded</p>
-        </div>
-      </div>
-    );
-  }
+  }, [vendors, onVendorSelect]);
 
   return (
     <div className="relative h-full w-full">
@@ -159,14 +131,6 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
                 View Profile
               </Link>
             </div>
-          </div>
-        </div>
-      )}
-
-      {!tokenLoaded && !tokenError && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-muted/80 backdrop-blur-sm">
-          <div className="rounded-xl bg-card p-6 text-center shadow-lg">
-            <p className="font-display font-bold text-foreground">Loading map...</p>
           </div>
         </div>
       )}
