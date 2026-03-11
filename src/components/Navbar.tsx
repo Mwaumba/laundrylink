@@ -1,12 +1,22 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Menu, X, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const location = useLocation();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const links = [
     { to: '/', label: 'Home' },
@@ -50,8 +60,17 @@ const Navbar = () => {
               Search
             </Button>
           </Link>
-          <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
-          <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
+          {user ? (
+            <>
+              <Link to="/vendor/dashboard"><Button variant="outline" size="sm">Dashboard</Button></Link>
+              <Button size="sm" variant="ghost" onClick={async () => { await supabase.auth.signOut(); }}>Sign Out</Button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
+              <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
