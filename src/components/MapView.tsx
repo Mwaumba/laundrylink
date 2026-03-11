@@ -3,29 +3,46 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Vendor } from '@/types';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MapViewProps {
   vendors: Vendor[];
   onVendorSelect?: (vendor: Vendor) => void;
 }
 
-const MAPBOX_TOKEN = 'YOUR_MAPBOX_TOKEN'; // Replace with your token
-
 const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
+  const [tokenLoaded, setTokenLoaded] = useState(false);
+  const [tokenError, setTokenError] = useState(false);
+
+  // Fetch Mapbox token from edge function
+  useEffect(() => {
+    const fetchToken = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        if (error || !data?.token) {
+          setTokenError(true);
+          return;
+        }
+        mapboxgl.accessToken = data.token;
+        setTokenLoaded(true);
+      } catch {
+        setTokenError(true);
+      }
+    };
+    fetchToken();
+  }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    if (!mapContainer.current || map.current || !tokenLoaded) return;
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [36.8219, -1.2864], // Nairobi center
+      center: [36.8219, -1.2864],
       zoom: 12,
     });
 
@@ -35,12 +52,11 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [tokenLoaded]);
 
   useEffect(() => {
     if (!map.current) return;
 
-    // Clear existing markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
@@ -76,19 +92,28 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
       markersRef.current.push(marker);
     });
 
-    // Fit bounds if vendors exist
     if (vendors.length > 1) {
       const bounds = new mapboxgl.LngLatBounds();
       vendors.forEach((v) => bounds.extend([v.lng, v.lat]));
       map.current.fitBounds(bounds, { padding: 60 });
     }
-  }, [vendors, onVendorSelect]);
+  }, [vendors, onVendorSelect, tokenLoaded]);
+
+  if (tokenError) {
+    return (
+      <div className="flex h-full items-center justify-center rounded-xl bg-muted/80">
+        <div className="rounded-xl bg-card p-6 text-center shadow-lg">
+          <p className="font-display font-bold text-foreground">Map Unavailable</p>
+          <p className="mt-1 text-sm text-muted-foreground">Mapbox token could not be loaded</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full w-full">
       <div ref={mapContainer} className="h-full w-full rounded-xl" />
 
-      {/* Selected vendor popup */}
       {selectedVendor && (
         <div className="absolute bottom-4 left-4 right-4 z-10 rounded-xl border border-border bg-card p-4 shadow-lg sm:left-auto sm:right-4 sm:w-80">
           <button
@@ -138,14 +163,10 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
         </div>
       )}
 
-      {/* Token warning */}
-      {MAPBOX_TOKEN === 'YOUR_MAPBOX_TOKEN' && (
+      {!tokenLoaded && !tokenError && (
         <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-muted/80 backdrop-blur-sm">
           <div className="rounded-xl bg-card p-6 text-center shadow-lg">
-            <p className="font-display font-bold text-foreground">Mapbox Token Required</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Add your Mapbox access token to enable the map view
-            </p>
+            <p className="font-display font-bold text-foreground">Loading map...</p>
           </div>
         </div>
       )}
