@@ -11,6 +11,7 @@ import Auth from "./pages/Auth.tsx";
 import VendorOnboarding from "./pages/VendorOnboarding.tsx";
 import VendorOnboardingPending from "./pages/VendorOnboardingPending.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
+import VendorDashboard from "./pages/VendorDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
