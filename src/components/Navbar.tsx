@@ -60,8 +60,17 @@ const Navbar = () => {
               Search
             </Button>
           </Link>
-          <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
-          <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
+          {user ? (
+            <>
+              <Link to="/vendor/dashboard"><Button variant="outline" size="sm">Dashboard</Button></Link>
+              <Button size="sm" variant="ghost" onClick={async () => { await supabase.auth.signOut(); }}>Sign Out</Button>
+            </>
+          ) : (
+            <>
+              <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
+              <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
