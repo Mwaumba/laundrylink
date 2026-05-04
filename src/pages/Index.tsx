@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import VendorCard from '@/components/VendorCard';
+import BookNowButton from '@/components/BookNowButton';
 import { vendors } from '@/data/vendors';
 import { neighborhoods } from '@/data/neighborhoods';
 import { useState } from 'react';
@@ -40,15 +41,15 @@ const Index = () => {
             className="max-w-2xl"
           >
             <h1 className="text-4xl font-display font-bold leading-tight text-primary-foreground md:text-5xl lg:text-6xl">
-              Find the Best{' '}
-              <span className="bg-primary-foreground/20 px-2 rounded-lg">Laundry</span>{' '}
-              Near You in Nairobi
+              Book Trusted{' '}
+              <span className="bg-primary-foreground/20 px-2 rounded-lg">Cleaning</span>{' '}
+              Services in Nairobi
             </h1>
             <p className="mt-5 text-lg text-primary-foreground/80 md:text-xl">
-              Compare prices, read reviews, and contact trusted laundry providers in your neighborhood. Pickup & delivery available.
+              Laundry, home cleaning, sofa, carpet, mattress and more. Book a vetted vendor or get matched with an independent provider on demand.
             </p>
 
-            <form onSubmit={handleSearch} className="mt-8 flex gap-3">
+            <form onSubmit={handleSearch} className="mt-8 flex flex-col gap-3 sm:flex-row">
               <div className="relative flex-1">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <Input
@@ -61,6 +62,7 @@ const Index = () => {
               <Button type="submit" size="lg" className="h-12 rounded-xl px-6 bg-cobalt hover:bg-cobalt/90 text-cobalt-foreground">
                 Search
               </Button>
+              <BookNowButton size="lg" className="h-12 rounded-xl px-6 bg-primary-foreground text-primary hover:bg-primary-foreground/90" />
             </form>
 
             <div className="mt-5 flex flex-wrap gap-2">

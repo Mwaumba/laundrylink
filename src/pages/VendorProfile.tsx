@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import BookNowButton from '@/components/BookNowButton';
 import { vendors } from '@/data/vendors';
 import { AvailabilityStatus } from '@/types';
 
@@ -73,6 +74,7 @@ const VendorProfile = () => {
               </div>
             </div>
             <div className="flex gap-2">
+              <BookNowButton vendorId={vendor.id} vendorName={vendor.name} className="bg-cobalt text-cobalt-foreground hover:bg-cobalt/90" />
               <Button variant="outline" size="sm" className="gap-1.5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
                 <Heart className="h-4 w-4" />
                 Save
