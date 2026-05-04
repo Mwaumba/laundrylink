@@ -1,9 +1,10 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { MapPin, Menu, X, Search } from 'lucide-react';
+import { MapPin, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import BookNowButton from '@/components/BookNowButton';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,15 +54,11 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
-          <Link to="/browse">
-            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground">
-              <Search className="h-4 w-4" />
-              Search
-            </Button>
-          </Link>
+        <div className="hidden items-center gap-2 md:flex">
+          <BookNowButton size="sm" variant="outline" />
           {user ? (
             <>
+              <Link to="/bookings"><Button variant="ghost" size="sm">My Bookings</Button></Link>
               <Link to="/vendor/dashboard"><Button variant="outline" size="sm">Dashboard</Button></Link>
               <Button size="sm" variant="ghost" onClick={async () => { await supabase.auth.signOut(); }}>Sign Out</Button>
             </>

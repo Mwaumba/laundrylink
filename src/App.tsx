@@ -12,6 +12,11 @@ import VendorOnboarding from "./pages/VendorOnboarding.tsx";
 import VendorOnboardingPending from "./pages/VendorOnboardingPending.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import VendorDashboard from "./pages/VendorDashboard.tsx";
+import MyBookings from "./pages/MyBookings.tsx";
+import BookingDetail from "./pages/BookingDetail.tsx";
+import JobRequestDetail from "./pages/JobRequestDetail.tsx";
+import ProviderOnboarding from "./pages/ProviderOnboarding.tsx";
+import ProviderDashboard from "./pages/ProviderDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -31,6 +36,11 @@ const App = () => (
           <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
           <Route path="/vendor/onboarding/pending" element={<VendorOnboardingPending />} />
           <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+          <Route path="/bookings" element={<MyBookings />} />
+          <Route path="/bookings/:id" element={<BookingDetail />} />
+          <Route path="/jobs/:id" element={<JobRequestDetail />} />
+          <Route path="/provider/onboarding" element={<ProviderOnboarding />} />
+          <Route path="/provider/dashboard" element={<ProviderDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
