@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Truck, Zap, CheckCircle, Shield, Award } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Vendor, AvailabilityStatus } from '@/types';
+import BookNowButton from '@/components/BookNowButton';
 
 const availabilityConfig: Record<AvailabilityStatus, { label: string; className: string }> = {
   accepting: { label: 'Accepting Laundry', className: 'bg-success/10 text-success border-success/20' },
@@ -99,6 +100,8 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
               ))}
             </div>
           </div>
+
+          <BookNowButton size="sm" fullWidth vendorId={vendor.id} vendorName={vendor.name} />
         </div>
       </div>
     </Link>
