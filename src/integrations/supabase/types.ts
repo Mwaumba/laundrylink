@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_status_history: {
+        Row: {
+          booking_id: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          note: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+        }
+        Insert: {
+          booking_id: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+        }
+        Update: {
+          booking_id?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_status_history_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          address: string | null
+          cancelled_reason: string | null
+          category_id: string | null
+          created_at: string
+          customer_id: string
+          customer_name: string | null
+          customer_phone: string | null
+          delivery_required: boolean | null
+          estimated_price: number | null
+          final_price: number | null
+          id: string
+          lat: number | null
+          lng: number | null
+          notes: string | null
+          pickup_required: boolean | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["booking_status"]
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          cancelled_reason?: string | null
+          category_id?: string | null
+          created_at?: string
+          customer_id: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivery_required?: boolean | null
+          estimated_price?: number | null
+          final_price?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          notes?: string | null
+          pickup_required?: boolean | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          cancelled_reason?: string | null
+          category_id?: string | null
+          created_at?: string
+          customer_id?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivery_required?: boolean | null
+          estimated_price?: number | null
+          final_price?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          notes?: string | null
+          pickup_required?: boolean | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["booking_status"]
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_hours: {
         Row: {
           close_time: string
@@ -78,6 +194,81 @@ export type Database = {
           },
         ]
       }
+      independent_providers: {
+        Row: {
+          availability: Database["public"]["Enums"]["provider_availability"]
+          avatar_url: string | null
+          base_lat: number | null
+          base_lng: number | null
+          bio: string | null
+          created_at: string
+          current_lat: number | null
+          current_lng: number | null
+          full_name: string
+          id: string
+          id_photo_url: string | null
+          jobs_completed: number | null
+          neighborhood: string | null
+          neighborhood_slug: string | null
+          phone: string
+          rating: number | null
+          review_count: number | null
+          service_radius_km: number | null
+          status: Database["public"]["Enums"]["provider_status"]
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          availability?: Database["public"]["Enums"]["provider_availability"]
+          avatar_url?: string | null
+          base_lat?: number | null
+          base_lng?: number | null
+          bio?: string | null
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          full_name: string
+          id?: string
+          id_photo_url?: string | null
+          jobs_completed?: number | null
+          neighborhood?: string | null
+          neighborhood_slug?: string | null
+          phone: string
+          rating?: number | null
+          review_count?: number | null
+          service_radius_km?: number | null
+          status?: Database["public"]["Enums"]["provider_status"]
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          availability?: Database["public"]["Enums"]["provider_availability"]
+          avatar_url?: string | null
+          base_lat?: number | null
+          base_lng?: number | null
+          bio?: string | null
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          full_name?: string
+          id?: string
+          id_photo_url?: string | null
+          jobs_completed?: number | null
+          neighborhood?: string | null
+          neighborhood_slug?: string | null
+          phone?: string
+          rating?: number | null
+          review_count?: number | null
+          service_radius_km?: number | null
+          status?: Database["public"]["Enums"]["provider_status"]
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           contact_method: string
@@ -118,6 +309,123 @@ export type Database = {
             columns: ["vendor_id"]
             isOneToOne: false
             referencedRelation: "vendor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_request_offers: {
+        Row: {
+          created_at: string
+          distance_km: number | null
+          id: string
+          job_request_id: string
+          provider_id: string
+          responded_at: string | null
+          response: Database["public"]["Enums"]["job_offer_response"]
+        }
+        Insert: {
+          created_at?: string
+          distance_km?: number | null
+          id?: string
+          job_request_id: string
+          provider_id: string
+          responded_at?: string | null
+          response?: Database["public"]["Enums"]["job_offer_response"]
+        }
+        Update: {
+          created_at?: string
+          distance_km?: number | null
+          id?: string
+          job_request_id?: string
+          provider_id?: string
+          responded_at?: string | null
+          response?: Database["public"]["Enums"]["job_offer_response"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_request_offers_job_request_id_fkey"
+            columns: ["job_request_id"]
+            isOneToOne: false
+            referencedRelation: "job_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_request_offers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "independent_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_requests: {
+        Row: {
+          address: string
+          assigned_provider_id: string | null
+          budget: number | null
+          category_id: string | null
+          created_at: string
+          customer_id: string
+          customer_name: string | null
+          customer_phone: string | null
+          expires_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          notes: string | null
+          scheduled_at: string | null
+          status: Database["public"]["Enums"]["job_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          assigned_provider_id?: string | null
+          budget?: number | null
+          category_id?: string | null
+          created_at?: string
+          customer_id: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          expires_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          notes?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["job_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          assigned_provider_id?: string | null
+          budget?: number | null
+          category_id?: string | null
+          created_at?: string
+          customer_id?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          expires_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          notes?: string | null
+          scheduled_at?: string | null
+          status?: Database["public"]["Enums"]["job_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_requests_assigned_provider_id_fkey"
+            columns: ["assigned_provider_id"]
+            isOneToOne: false
+            referencedRelation: "independent_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_requests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -185,35 +493,97 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_services: {
+        Row: {
+          base_price: number | null
+          category_id: string
+          created_at: string
+          id: string
+          price_unit: string | null
+          provider_id: string
+        }
+        Insert: {
+          base_price?: number | null
+          category_id: string
+          created_at?: string
+          id?: string
+          price_unit?: string | null
+          provider_id: string
+        }
+        Update: {
+          base_price?: number | null
+          category_id?: string
+          created_at?: string
+          id?: string
+          price_unit?: string | null
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "independent_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
+          booking_id: string | null
           comment: string | null
           created_at: string
           customer_name: string
           id: string
+          provider_id: string | null
           rating: number
           user_id: string
           vendor_id: string
         }
         Insert: {
+          booking_id?: string | null
           comment?: string | null
           created_at?: string
           customer_name: string
           id?: string
+          provider_id?: string | null
           rating: number
           user_id: string
           vendor_id: string
         }
         Update: {
+          booking_id?: string | null
           comment?: string | null
           created_at?: string
           customer_name?: string
           id?: string
+          provider_id?: string | null
           rating?: number
           user_id?: string
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "independent_providers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reviews_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -222,6 +592,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+          sort_order: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+          sort_order?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+          sort_order?: number | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -408,11 +811,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_services: {
+        Row: {
+          base_price: number | null
+          category_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          price_unit: string | null
+          vendor_id: string
+        }
+        Insert: {
+          base_price?: number | null
+          category_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          price_unit?: string | null
+          vendor_id: string
+        }
+        Update: {
+          base_price?: number | null
+          category_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          price_unit?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      accept_job_offer: { Args: { _offer_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -422,9 +871,33 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "provider"
       badge_type: "verified" | "trusted" | "top-rated" | "fast-response"
+      booking_status:
+        | "requested"
+        | "accepted"
+        | "pickup_scheduled"
+        | "picked_up"
+        | "in_progress"
+        | "ready"
+        | "out_for_delivery"
+        | "completed"
+        | "cancelled"
+      job_offer_response: "pending" | "accepted" | "rejected" | "expired"
+      job_request_status:
+        | "broadcasting"
+        | "assigned"
+        | "completed"
+        | "cancelled"
+        | "expired"
       onboarding_status: "draft" | "pending" | "approved" | "rejected"
+      provider_availability: "online" | "busy" | "offline"
+      provider_status:
+        | "draft"
+        | "pending_approval"
+        | "approved"
+        | "rejected"
+        | "suspended"
       vendor_availability: "accepting" | "limited" | "fully-booked"
       vendor_type:
         | "laundry-shop"
@@ -559,9 +1032,36 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "provider"],
       badge_type: ["verified", "trusted", "top-rated", "fast-response"],
+      booking_status: [
+        "requested",
+        "accepted",
+        "pickup_scheduled",
+        "picked_up",
+        "in_progress",
+        "ready",
+        "out_for_delivery",
+        "completed",
+        "cancelled",
+      ],
+      job_offer_response: ["pending", "accepted", "rejected", "expired"],
+      job_request_status: [
+        "broadcasting",
+        "assigned",
+        "completed",
+        "cancelled",
+        "expired",
+      ],
       onboarding_status: ["draft", "pending", "approved", "rejected"],
+      provider_availability: ["online", "busy", "offline"],
+      provider_status: [
+        "draft",
+        "pending_approval",
+        "approved",
+        "rejected",
+        "suspended",
+      ],
       vendor_availability: ["accepting", "limited", "fully-booked"],
       vendor_type: [
         "laundry-shop",
