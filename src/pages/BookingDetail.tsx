@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Phone, Loader2, X } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Phone, Loader2, X, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookingTimeline, { BookingStatus } from '@/components/BookingTimeline';
+import ReviewForm from '@/components/ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -33,6 +34,7 @@ const BookingDetail = () => {
   const [vendor, setVendor] = useState<{ name: string; slug: string } | null>(null);
   const [category, setCategory] = useState<{ name: string; icon: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasReview, setHasReview] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -66,6 +68,14 @@ const BookingDetail = () => {
         if (c) setCategory(c);
       }
       setLoading(false);
+
+      // Check if review already exists
+      const { data: existingReview } = await supabase
+        .from('reviews')
+        .select('id')
+        .eq('booking_id', id)
+        .maybeSingle();
+      if (existingReview) setHasReview(true);
     };
 
     load();
