@@ -188,6 +188,24 @@ const BookingDetail = () => {
           <BookingTimeline status={booking.status} />
         </div>
 
+        {booking.status === 'completed' && booking.vendor_id && !hasReview && (
+          <div className="mt-6">
+            <ReviewForm
+              bookingId={booking.id}
+              vendorId={booking.vendor_id}
+              defaultName={booking.customer_name ?? ''}
+              onSubmitted={() => setHasReview(true)}
+            />
+          </div>
+        )}
+
+        {booking.status === 'completed' && hasReview && (
+          <div className="mt-6 flex items-center gap-2 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">
+            <Star className="h-4 w-4 fill-warning text-warning" />
+            Thanks — your review has been submitted.
+          </div>
+        )}
+
         {canCancel && (
           <Button variant="outline" className="mt-6 gap-2 text-destructive" onClick={cancel}>
             <X className="h-4 w-4" /> Cancel booking
