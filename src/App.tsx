@@ -18,6 +18,7 @@ import JobRequestDetail from "./pages/JobRequestDetail.tsx";
 import ProviderOnboarding from "./pages/ProviderOnboarding.tsx";
 import ProviderDashboard from "./pages/ProviderDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ChatbotWidget from "./components/ChatbotWidget.tsx";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ChatbotWidget />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
