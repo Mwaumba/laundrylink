@@ -19,12 +19,14 @@ import ProviderOnboarding from "./pages/ProviderOnboarding.tsx";
 import ProviderDashboard from "./pages/ProviderDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ChatbotWidget from "./components/ChatbotWidget.tsx";
+import { ThemeProvider } from "./components/ThemeProvider.tsx";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -47,7 +49,8 @@ const App = () => (
         </Routes>
         <ChatbotWidget />
       </BrowserRouter>
-    </TooltipProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
