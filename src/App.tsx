@@ -38,6 +38,7 @@ const App = () => (
           <Route path="/vendor/:slug" element={<VendorProfile />} />
           <Route path="/neighborhoods" element={<Neighborhoods />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
           <Route path="/vendor/onboarding/pending" element={<VendorOnboardingPending />} />
           <Route path="/vendor/dashboard" element={<RoleGuard allow={['vendor', 'admin']}><VendorDashboard /></RoleGuard>} />
