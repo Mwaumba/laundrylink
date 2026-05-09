@@ -17,10 +17,14 @@ interface Row {
   address: string | null;
   created_at: string;
   vendor_id: string | null;
+  assigned_provider_id: string | null;
   category_id: string | null;
 }
 
+interface PartyMap { [id: string]: { name: string; kind: 'vendor' | 'provider' } }
+
 const STATUS_TONE: Record<string, string> = {
+  requested: 'bg-warning/15 text-warning border-warning/30',
   pending: 'bg-warning/15 text-warning border-warning/30',
   accepted: 'bg-sky text-sky-foreground border-sky/40',
   in_progress: 'bg-cobalt/15 text-cobalt border-cobalt/30',
@@ -31,6 +35,7 @@ const STATUS_TONE: Record<string, string> = {
 const MyBookings = () => {
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
+  const [parties, setParties] = useState<PartyMap>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,7 +50,22 @@ const MyBookings = () => {
         .select('*')
         .eq('customer_id', user.id)
         .order('created_at', { ascending: false });
-      setRows((data ?? []) as Row[]);
+      const list = (data ?? []) as Row[];
+      setRows(list);
+
+      // Fetch assigned party names in batch.
+      const vendorIds = Array.from(new Set(list.map((r) => r.vendor_id).filter(Boolean) as string[]));
+      const providerIds = Array.from(new Set(list.map((r) => r.assigned_provider_id).filter(Boolean) as string[]));
+      const map: PartyMap = {};
+      if (vendorIds.length) {
+        const { data: vs } = await supabase.from('vendor_profiles').select('id, name').in('id', vendorIds);
+        (vs ?? []).forEach((v: any) => { map[v.id] = { name: v.name, kind: 'vendor' }; });
+      }
+      if (providerIds.length) {
+        const { data: ps } = await supabase.from('independent_providers').select('id, full_name').in('id', providerIds);
+        (ps ?? []).forEach((p: any) => { map[p.id] = { name: p.full_name, kind: 'provider' }; });
+      }
+      setParties(map);
       setLoading(false);
     };
     load();
