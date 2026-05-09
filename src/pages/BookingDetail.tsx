@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Calendar, Phone, Loader2, X, Star, Truck, Package, CreditCard, FileText, Sparkles } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Phone, X, Star, Truck, Package, CreditCard, FileText, Sparkles, UserCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookingTimeline, { BookingStatus } from '@/components/BookingTimeline';
 import ReviewForm from '@/components/ReviewForm';
+import AssignedProviderCard, { AssignedParty } from '@/components/AssignedProviderCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
