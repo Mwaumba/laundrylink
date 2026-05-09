@@ -20,6 +20,7 @@ import ProviderDashboard from "./pages/ProviderDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ChatbotWidget from "./components/ChatbotWidget.tsx";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
+import RoleGuard from "./components/RoleGuard.tsx";
 
 const queryClient = new QueryClient();
 
