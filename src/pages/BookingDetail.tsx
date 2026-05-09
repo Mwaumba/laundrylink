@@ -226,17 +226,17 @@ const BookingDetail = () => {
               <h1 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
                 {category?.name ?? 'Service booking'}
               </h1>
-              {vendor ? (
-                <Link to={`/vendor/${vendor.slug}`} className="mt-1 inline-block text-sm text-primary hover:underline">
-                  Provided by {vendor.name}
-                </Link>
+              {assigned ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Accepted by <span className="font-medium text-foreground">{assigned.name}</span>
+                </p>
               ) : (
                 <p className="mt-1 text-sm text-muted-foreground">Awaiting provider assignment</p>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {vendor?.phone && (
-                <a href={`tel:${vendor.phone}`}>
+              {assigned?.phone && (
+                <a href={`tel:${assigned.phone}`}>
                   <Button variant="outline" size="sm" className="gap-2"><Phone className="h-4 w-4" /> Call</Button>
                 </a>
               )}
@@ -248,6 +248,17 @@ const BookingDetail = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Assigned provider / awaiting card */}
+        <div className="mt-6">
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground/80">
+            <UserCheck className="h-4 w-4 text-primary" /> Provider
+          </div>
+          <AssignedProviderCard
+            loading={assignedLoading && !assigned && ASSIGNED_STATUSES.includes(booking.status)}
+            party={assigned}
+          />
+        </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* Left column: timeline + details */}
