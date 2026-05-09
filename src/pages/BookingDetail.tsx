@@ -53,25 +53,83 @@ const BookingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<Booking | null>(null);
-  const [vendor, setVendor] = useState<{ name: string; slug: string; phone?: string | null } | null>(null);
+  const [assigned, setAssigned] = useState<AssignedParty | null>(null);
+  const [assignedLoading, setAssignedLoading] = useState(false);
   const [category, setCategory] = useState<{ name: string; icon: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasReview, setHasReview] = useState(false);
+
+  // Resolve who the booking is assigned to (vendor or independent provider).
+  const loadAssigned = async (b: Booking) => {
+    const isAssigned = ASSIGNED_STATUSES.includes(b.status);
+    if (!isAssigned && !b.vendor_id && !b.assigned_provider_id) {
+      setAssigned(null);
+      return;
+    }
+    setAssignedLoading(true);
+    try {
+      if (b.vendor_id) {
+        const { data: v } = await supabase
+          .from('vendor_profiles')
+          .select('name, slug, phone, whatsapp, rating, review_count, neighborhood, is_verified, type_label, images')
+          .eq('id', b.vendor_id)
+          .maybeSingle();
+        if (v) {
+          setAssigned({
+            kind: 'vendor',
+            name: v.name,
+            slug: v.slug,
+            phone: v.phone,
+            whatsapp: v.whatsapp,
+            rating: v.rating,
+            review_count: v.review_count,
+            neighborhood: v.neighborhood,
+            is_verified: v.is_verified,
+            type_label: v.type_label,
+            avatar_url: Array.isArray(v.images) ? v.images[0] : null,
+            accepted_at: b.accepted_at,
+          });
+          return;
+        }
+      }
+      if (b.assigned_provider_id) {
+        const { data: p } = await supabase
+          .from('independent_providers')
+          .select('full_name, phone, whatsapp, avatar_url, rating, review_count, neighborhood')
+          .eq('id', b.assigned_provider_id)
+          .maybeSingle();
+        if (p) {
+          setAssigned({
+            kind: 'provider',
+            name: p.full_name,
+            phone: p.phone,
+            whatsapp: p.whatsapp,
+            avatar_url: p.avatar_url,
+            rating: p.rating,
+            review_count: p.review_count,
+            neighborhood: p.neighborhood,
+            accepted_at: b.accepted_at,
+          });
+          return;
+        }
+      }
+      setAssigned(null);
+    } finally {
+      setAssignedLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
       const { data, error } = await supabase.from('bookings').select('*').eq('id', id).maybeSingle();
       if (error || !data) { setLoading(false); return; }
-      setBooking(data as Booking);
-      if (data.vendor_id) {
-        const { data: v } = await supabase
-          .from('vendor_profiles').select('name, slug, phone').eq('id', data.vendor_id).maybeSingle();
-        if (v) setVendor(v);
-      }
-      if (data.category_id) {
+      const b = data as Booking;
+      setBooking(b);
+      loadAssigned(b);
+      if (b.category_id) {
         const { data: c } = await supabase
-          .from('service_categories').select('name, icon').eq('id', data.category_id).maybeSingle();
+          .from('service_categories').select('name, icon').eq('id', b.category_id).maybeSingle();
         if (c) setCategory(c);
       }
       setLoading(false);
@@ -84,7 +142,11 @@ const BookingDetail = () => {
     const channel = supabase
       .channel(`booking-${id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings', filter: `id=eq.${id}` },
-        (payload) => setBooking(payload.new as Booking))
+        (payload) => {
+          const next = payload.new as Booking;
+          setBooking(next);
+          loadAssigned(next);
+        })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [id]);
