@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2, Sparkles, Calendar, MapPin } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Sparkles, Calendar, MapPin, ArrowRight, Package } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import BookNowButton from '@/components/BookNowButton';
 
 interface Row {
@@ -17,6 +20,14 @@ interface Row {
   category_id: string | null;
 }
 
+const STATUS_TONE: Record<string, string> = {
+  pending: 'bg-warning/15 text-warning border-warning/30',
+  accepted: 'bg-sky text-sky-foreground border-sky/40',
+  in_progress: 'bg-cobalt/15 text-cobalt border-cobalt/30',
+  completed: 'bg-success/15 text-success border-success/30',
+  cancelled: 'bg-destructive/15 text-destructive border-destructive/30',
+};
+
 const MyBookings = () => {
   const navigate = useNavigate();
   const [rows, setRows] = useState<Row[]>([]);
@@ -26,7 +37,7 @@ const MyBookings = () => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate('/auth');
+        navigate('/auth?redirect=/bookings');
         return;
       }
       const { data } = await supabase
@@ -43,49 +54,99 @@ const MyBookings = () => {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Navbar />
-      <div className="container mx-auto max-w-4xl flex-1 px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="font-display text-3xl font-bold">My Bookings</h1>
-          <BookNowButton />
-        </div>
 
-        {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
-        ) : rows.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
-            <Sparkles className="mx-auto mb-3 h-10 w-10 text-cobalt" />
-            <p className="font-medium text-foreground">No bookings yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Book a service to get started.</p>
+      {/* Hero header */}
+      <section className="border-b border-border gradient-sky">
+        <div className="container mx-auto max-w-5xl px-4 py-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-cobalt">Your activity</p>
+              <h1 className="mt-1 font-display text-3xl font-bold text-foreground md:text-4xl">My Bookings</h1>
+              <p className="mt-1 text-muted-foreground">Track every cleaning request from request to completion.</p>
+            </div>
+            <BookNowButton />
           </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto max-w-5xl flex-1 px-4 py-8">
+        {loading ? (
+          <div className="space-y-3">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : rows.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-dashed border-border bg-card p-12 text-center shadow-card"
+          >
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky">
+              <Sparkles className="h-7 w-7 text-cobalt" />
+            </div>
+            <h2 className="font-display text-xl font-semibold text-foreground">No bookings yet</h2>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+              Browse vendors or post a quick job — providers nearby will respond fast.
+            </p>
+            <div className="mt-6 flex justify-center gap-2">
+              <BookNowButton />
+              <Link to="/browse">
+                <Button variant="outline">Browse vendors</Button>
+              </Link>
+            </div>
+          </motion.div>
         ) : (
           <div className="space-y-3">
-            {rows.map((r) => (
-              <Link
+            {rows.map((r, i) => (
+              <motion.div
                 key={r.id}
-                to={`/bookings/${r.id}`}
-                className="flex items-center justify-between rounded-xl border border-border bg-card p-4 transition-all hover:border-cobalt/40 hover:shadow-card"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
               >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize">{r.status.replace(/_/g, ' ')}</Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(r.created_at).toLocaleDateString()}
-                    </span>
+                <Link
+                  to={`/bookings/${r.id}`}
+                  className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:border-cobalt/40 hover:shadow-card-hover"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky">
+                    <Package className="h-5 w-5 text-cobalt" />
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
-                    {r.scheduled_at && (
-                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{new Date(r.scheduled_at).toLocaleString()}</span>
-                    )}
-                    {r.address && (
-                      <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{r.address}</span>
-                    )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className={`capitalize ${STATUS_TONE[r.status] ?? ''}`}
+                      >
+                        {r.status.replace(/_/g, ' ')}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Created {new Date(r.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                      {r.scheduled_at && (
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          {new Date(r.scheduled_at).toLocaleString()}
+                        </span>
+                      )}
+                      {r.address && (
+                        <span className="flex items-center gap-1.5 truncate">
+                          <MapPin className="h-3.5 w-3.5" />
+                          {r.address}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Link>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-cobalt" />
+                </Link>
+              </motion.div>
             ))}
           </div>
         )}
       </div>
+
       <Footer />
     </div>
   );
