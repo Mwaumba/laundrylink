@@ -28,8 +28,14 @@ interface Booking {
   final_price: number | null;
   created_at: string;
   vendor_id: string | null;
+  assigned_provider_id: string | null;
+  accepted_at: string | null;
   category_id: string | null;
 }
+
+const ASSIGNED_STATUSES: BookingStatus[] = [
+  'accepted', 'pickup_scheduled', 'picked_up', 'in_progress', 'ready', 'out_for_delivery', 'completed',
+];
 
 const STATUS_TONE: Record<BookingStatus, string> = {
   requested: 'bg-muted text-muted-foreground',
