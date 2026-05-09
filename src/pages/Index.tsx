@@ -229,9 +229,11 @@ const Index = () => {
             Join LaundryLink and reach thousands of customers in Nairobi
           </p>
           <div className="mt-6 flex justify-center gap-3">
-            <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-xl">
-              List Your Business
-            </Button>
+            <Link to="/vendor/onboarding">
+              <Button size="lg" className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-xl">
+                List Your Business
+              </Button>
+            </Link>
             <Link to="/browse">
               <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 rounded-xl">
                 Browse Vendors
