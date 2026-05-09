@@ -51,7 +51,9 @@ export type Database = {
       }
       bookings: {
         Row: {
+          accepted_at: string | null
           address: string | null
+          assigned_provider_id: string | null
           cancelled_reason: string | null
           category_id: string | null
           created_at: string
@@ -72,7 +74,9 @@ export type Database = {
           vendor_id: string | null
         }
         Insert: {
+          accepted_at?: string | null
           address?: string | null
+          assigned_provider_id?: string | null
           cancelled_reason?: string | null
           category_id?: string | null
           created_at?: string
@@ -93,7 +97,9 @@ export type Database = {
           vendor_id?: string | null
         }
         Update: {
+          accepted_at?: string | null
           address?: string | null
+          assigned_provider_id?: string | null
           cancelled_reason?: string | null
           category_id?: string | null
           created_at?: string

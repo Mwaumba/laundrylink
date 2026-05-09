@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Calendar, Phone, Loader2, X, Star, Truck, Package, CreditCard, FileText, Sparkles } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Phone, X, Star, Truck, Package, CreditCard, FileText, Sparkles, UserCheck } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookingTimeline, { BookingStatus } from '@/components/BookingTimeline';
 import ReviewForm from '@/components/ReviewForm';
+import AssignedProviderCard, { AssignedParty } from '@/components/AssignedProviderCard';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,8 +28,14 @@ interface Booking {
   final_price: number | null;
   created_at: string;
   vendor_id: string | null;
+  assigned_provider_id: string | null;
+  accepted_at: string | null;
   category_id: string | null;
 }
+
+const ASSIGNED_STATUSES: BookingStatus[] = [
+  'accepted', 'pickup_scheduled', 'picked_up', 'in_progress', 'ready', 'out_for_delivery', 'completed',
+];
 
 const STATUS_TONE: Record<BookingStatus, string> = {
   requested: 'bg-muted text-muted-foreground',
@@ -46,25 +53,83 @@ const BookingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState<Booking | null>(null);
-  const [vendor, setVendor] = useState<{ name: string; slug: string; phone?: string | null } | null>(null);
+  const [assigned, setAssigned] = useState<AssignedParty | null>(null);
+  const [assignedLoading, setAssignedLoading] = useState(false);
   const [category, setCategory] = useState<{ name: string; icon: string | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasReview, setHasReview] = useState(false);
+
+  // Resolve who the booking is assigned to (vendor or independent provider).
+  const loadAssigned = async (b: Booking) => {
+    const isAssigned = ASSIGNED_STATUSES.includes(b.status);
+    if (!isAssigned && !b.vendor_id && !b.assigned_provider_id) {
+      setAssigned(null);
+      return;
+    }
+    setAssignedLoading(true);
+    try {
+      if (b.vendor_id) {
+        const { data: v } = await supabase
+          .from('vendor_profiles')
+          .select('name, slug, phone, whatsapp, rating, review_count, neighborhood, is_verified, type_label, images')
+          .eq('id', b.vendor_id)
+          .maybeSingle();
+        if (v) {
+          setAssigned({
+            kind: 'vendor',
+            name: v.name,
+            slug: v.slug,
+            phone: v.phone,
+            whatsapp: v.whatsapp,
+            rating: v.rating,
+            review_count: v.review_count,
+            neighborhood: v.neighborhood,
+            is_verified: v.is_verified,
+            type_label: v.type_label,
+            avatar_url: Array.isArray(v.images) ? v.images[0] : null,
+            accepted_at: b.accepted_at,
+          });
+          return;
+        }
+      }
+      if (b.assigned_provider_id) {
+        const { data: p } = await supabase
+          .from('independent_providers')
+          .select('full_name, phone, whatsapp, avatar_url, rating, review_count, neighborhood')
+          .eq('id', b.assigned_provider_id)
+          .maybeSingle();
+        if (p) {
+          setAssigned({
+            kind: 'provider',
+            name: p.full_name,
+            phone: p.phone,
+            whatsapp: p.whatsapp,
+            avatar_url: p.avatar_url,
+            rating: p.rating,
+            review_count: p.review_count,
+            neighborhood: p.neighborhood,
+            accepted_at: b.accepted_at,
+          });
+          return;
+        }
+      }
+      setAssigned(null);
+    } finally {
+      setAssignedLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
     const load = async () => {
       const { data, error } = await supabase.from('bookings').select('*').eq('id', id).maybeSingle();
       if (error || !data) { setLoading(false); return; }
-      setBooking(data as Booking);
-      if (data.vendor_id) {
-        const { data: v } = await supabase
-          .from('vendor_profiles').select('name, slug, phone').eq('id', data.vendor_id).maybeSingle();
-        if (v) setVendor(v);
-      }
-      if (data.category_id) {
+      const b = data as Booking;
+      setBooking(b);
+      loadAssigned(b);
+      if (b.category_id) {
         const { data: c } = await supabase
-          .from('service_categories').select('name, icon').eq('id', data.category_id).maybeSingle();
+          .from('service_categories').select('name, icon').eq('id', b.category_id).maybeSingle();
         if (c) setCategory(c);
       }
       setLoading(false);
@@ -77,7 +142,11 @@ const BookingDetail = () => {
     const channel = supabase
       .channel(`booking-${id}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'bookings', filter: `id=eq.${id}` },
-        (payload) => setBooking(payload.new as Booking))
+        (payload) => {
+          const next = payload.new as Booking;
+          setBooking(next);
+          loadAssigned(next);
+        })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [id]);
@@ -157,17 +226,17 @@ const BookingDetail = () => {
               <h1 className="font-display text-2xl font-bold tracking-tight md:text-3xl">
                 {category?.name ?? 'Service booking'}
               </h1>
-              {vendor ? (
-                <Link to={`/vendor/${vendor.slug}`} className="mt-1 inline-block text-sm text-primary hover:underline">
-                  Provided by {vendor.name}
-                </Link>
+              {assigned ? (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Accepted by <span className="font-medium text-foreground">{assigned.name}</span>
+                </p>
               ) : (
                 <p className="mt-1 text-sm text-muted-foreground">Awaiting provider assignment</p>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {vendor?.phone && (
-                <a href={`tel:${vendor.phone}`}>
+              {assigned?.phone && (
+                <a href={`tel:${assigned.phone}`}>
                   <Button variant="outline" size="sm" className="gap-2"><Phone className="h-4 w-4" /> Call</Button>
                 </a>
               )}
@@ -179,6 +248,17 @@ const BookingDetail = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Assigned provider / awaiting card */}
+        <div className="mt-6">
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-foreground/80">
+            <UserCheck className="h-4 w-4 text-primary" /> Provider
+          </div>
+          <AssignedProviderCard
+            loading={assignedLoading && !assigned && ASSIGNED_STATUSES.includes(booking.status)}
+            party={assigned}
+          />
+        </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
           {/* Left column: timeline + details */}

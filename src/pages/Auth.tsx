@@ -11,11 +11,20 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 /**
- * 🔐 Supabase Auth — required dashboard settings (Cloud → Users → Auth Settings)
- *  • Email provider: ENABLED
- *  • Confirm email: ON  → users must verify before sign-in
- *  • Site URL: deployed app URL (or http://localhost:5173 in dev)
- *  • Redirect URLs include http://localhost:5173/**, plus production domain/**
+ * 🔐 Supabase Auth — required dashboard settings
+ *  Authentication → URL Configuration:
+ *    Site URL: https://laundrylink2.vercel.app  (production)
+ *    Redirect URLs (add ALL of these):
+ *      https://laundrylink2.vercel.app
+ *      https://laundrylink2.vercel.app/**
+ *      https://laundrylink2.vercel.app/auth/callback
+ *      http://localhost:5173
+ *      http://localhost:5173/**
+ *      http://localhost:5173/auth/callback
+ *  Authentication → Providers → Email: ENABLED, Confirm email: ON.
+ *  We always pass `emailRedirectTo = ${origin}/auth/callback` so verification
+ *  links return users to the SAME origin they signed up from (no hardcoded
+ *  lovableproject.com domains).
  */
 
 type AccountType = 'customer' | 'vendor';
@@ -58,12 +67,13 @@ const Auth = () => {
         toast.success('Welcome back!');
         navigate('/');
       } else {
-        const redirectUrl = `${window.location.origin}/`;
+        const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+        const redirectUrl = `${appUrl}/auth/callback`;
         const { data, error } = await supabase.auth.signUp({
           email: form.email.trim(),
           password: form.password,
           options: {
-            data: { full_name: form.fullName, account_type: accountType },
+            data: { full_name: form.fullName, account_type: accountType, role: accountType },
             emailRedirectTo: redirectUrl,
           },
         });
@@ -74,7 +84,7 @@ const Auth = () => {
 
         if (data.session) {
           toast.success('Account created!');
-          navigate(accountType === 'vendor' ? '/vendor/onboarding' : '/');
+          navigate(accountType === 'vendor' ? '/vendor/onboarding' : '/bookings');
         } else {
           setVerifySent(form.email.trim());
           toast.success('Check your email to verify your account before signing in.');

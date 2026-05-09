@@ -8,6 +8,7 @@ import Browse from "./pages/Browse.tsx";
 import VendorProfile from "./pages/VendorProfile.tsx";
 import Neighborhoods from "./pages/Neighborhoods.tsx";
 import Auth from "./pages/Auth.tsx";
+import AuthCallback from "./pages/AuthCallback.tsx";
 import VendorOnboarding from "./pages/VendorOnboarding.tsx";
 import VendorOnboardingPending from "./pages/VendorOnboardingPending.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/vendor/:slug" element={<VendorProfile />} />
           <Route path="/neighborhoods" element={<Neighborhoods />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
           <Route path="/vendor/onboarding/pending" element={<VendorOnboardingPending />} />
           <Route path="/vendor/dashboard" element={<RoleGuard allow={['vendor', 'admin']}><VendorDashboard /></RoleGuard>} />
