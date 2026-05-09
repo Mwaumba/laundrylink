@@ -140,8 +140,23 @@ const MyBookings = () => {
                       >
                         {r.status.replace(/_/g, ' ')}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Created {new Date(r.created_at).toLocaleDateString()}
+                      {(() => {
+                        const partyId = r.vendor_id ?? r.assigned_provider_id;
+                        const party = partyId ? parties[partyId] : null;
+                        if (party) {
+                          return (
+                            <span className="text-xs font-medium text-foreground">
+                              · {party.name}
+                            </span>
+                          );
+                        }
+                        if (r.status === 'requested' || r.status === 'pending') {
+                          return <span className="text-xs italic text-muted-foreground">· Awaiting provider</span>;
+                        }
+                        return null;
+                      })()}
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {new Date(r.created_at).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
