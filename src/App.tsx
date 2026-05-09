@@ -8,6 +8,7 @@ import Browse from "./pages/Browse.tsx";
 import VendorProfile from "./pages/VendorProfile.tsx";
 import Neighborhoods from "./pages/Neighborhoods.tsx";
 import Auth from "./pages/Auth.tsx";
+import AuthCallback from "./pages/AuthCallback.tsx";
 import VendorOnboarding from "./pages/VendorOnboarding.tsx";
 import VendorOnboardingPending from "./pages/VendorOnboardingPending.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
