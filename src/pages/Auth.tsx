@@ -67,12 +67,13 @@ const Auth = () => {
         toast.success('Welcome back!');
         navigate('/');
       } else {
-        const redirectUrl = `${window.location.origin}/`;
+        const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+        const redirectUrl = `${appUrl}/auth/callback`;
         const { data, error } = await supabase.auth.signUp({
           email: form.email.trim(),
           password: form.password,
           options: {
-            data: { full_name: form.fullName, account_type: accountType },
+            data: { full_name: form.fullName, account_type: accountType, role: accountType },
             emailRedirectTo: redirectUrl,
           },
         });
@@ -83,7 +84,7 @@ const Auth = () => {
 
         if (data.session) {
           toast.success('Account created!');
-          navigate(accountType === 'vendor' ? '/vendor/onboarding' : '/');
+          navigate(accountType === 'vendor' ? '/vendor/onboarding' : '/bookings');
         } else {
           setVerifySent(form.email.trim());
           toast.success('Check your email to verify your account before signing in.');
