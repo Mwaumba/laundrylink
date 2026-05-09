@@ -20,6 +20,7 @@ import ProviderDashboard from "./pages/ProviderDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ChatbotWidget from "./components/ChatbotWidget.tsx";
 import { ThemeProvider } from "./components/ThemeProvider.tsx";
+import RoleGuard from "./components/RoleGuard.tsx";
 
 const queryClient = new QueryClient();
 
@@ -38,13 +39,13 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
           <Route path="/vendor/onboarding/pending" element={<VendorOnboardingPending />} />
-          <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-          <Route path="/bookings" element={<MyBookings />} />
-          <Route path="/bookings/:id" element={<BookingDetail />} />
+          <Route path="/vendor/dashboard" element={<RoleGuard allow={['vendor', 'admin']}><VendorDashboard /></RoleGuard>} />
+          <Route path="/bookings" element={<RoleGuard allow={['customer', 'vendor', 'admin']}><MyBookings /></RoleGuard>} />
+          <Route path="/bookings/:id" element={<RoleGuard allow={['customer', 'vendor', 'admin']}><BookingDetail /></RoleGuard>} />
           <Route path="/jobs/:id" element={<JobRequestDetail />} />
           <Route path="/provider/onboarding" element={<ProviderOnboarding />} />
           <Route path="/provider/dashboard" element={<ProviderDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<RoleGuard allow={['admin']}><AdminDashboard /></RoleGuard>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <ChatbotWidget />
