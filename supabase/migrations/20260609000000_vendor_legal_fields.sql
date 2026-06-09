@@ -1,0 +1,17 @@
+ALTER TABLE public.vendor_profiles
+  ADD COLUMN IF NOT EXISTS is_individual boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS kra_pin text,
+  ADD COLUMN IF NOT EXISTS registration_number text,
+  ADD COLUMN IF NOT EXISTS national_id_number text,
+  ADD COLUMN IF NOT EXISTS reference_name text,
+  ADD COLUMN IF NOT EXISTS reference_phone text,
+  ADD COLUMN IF NOT EXISTS turnaround_time text,
+  ADD COLUMN IF NOT EXISTS minimum_order text,
+  ADD COLUMN IF NOT EXISTS payment_methods text[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS docs_registration_cert_path text,
+  ADD COLUMN IF NOT EXISTS docs_business_permit_path text,
+  ADD COLUMN IF NOT EXISTS docs_kra_pin_path text,
+  ADD COLUMN IF NOT EXISTS docs_national_id_front_path text,
+  ADD COLUMN IF NOT EXISTS docs_national_id_selfie_path text,
+  ADD COLUMN IF NOT EXISTS year_established integer,
+  ADD COLUMN IF NOT EXISTS years_experience text;

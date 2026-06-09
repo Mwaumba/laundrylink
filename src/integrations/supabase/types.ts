@@ -770,6 +770,22 @@ export type Database = {
           user_id: string | null
           website: string | null
           whatsapp: string | null
+          docs_business_permit_path: string | null
+          docs_kra_pin_path: string | null
+          docs_national_id_front_path: string | null
+          docs_national_id_selfie_path: string | null
+          docs_registration_cert_path: string | null
+          is_individual: boolean | null
+          kra_pin: string | null
+          minimum_order: string | null
+          national_id_number: string | null
+          payment_methods: string[] | null
+          reference_name: string | null
+          reference_phone: string | null
+          registration_number: string | null
+          turnaround_time: string | null
+          year_established: number | null
+          years_experience: string | null
         }
         Insert: {
           address?: string | null
@@ -813,6 +829,22 @@ export type Database = {
           user_id?: string | null
           website?: string | null
           whatsapp?: string | null
+          docs_business_permit_path?: string | null
+          docs_kra_pin_path?: string | null
+          docs_national_id_front_path?: string | null
+          docs_national_id_selfie_path?: string | null
+          docs_registration_cert_path?: string | null
+          is_individual?: boolean | null
+          kra_pin?: string | null
+          minimum_order?: string | null
+          national_id_number?: string | null
+          payment_methods?: string[] | null
+          reference_name?: string | null
+          reference_phone?: string | null
+          registration_number?: string | null
+          turnaround_time?: string | null
+          year_established?: number | null
+          years_experience?: string | null
         }
         Update: {
           address?: string | null
@@ -856,6 +888,22 @@ export type Database = {
           user_id?: string | null
           website?: string | null
           whatsapp?: string | null
+          docs_business_permit_path?: string | null
+          docs_kra_pin_path?: string | null
+          docs_national_id_front_path?: string | null
+          docs_national_id_selfie_path?: string | null
+          docs_registration_cert_path?: string | null
+          is_individual?: boolean | null
+          kra_pin?: string | null
+          minimum_order?: string | null
+          national_id_number?: string | null
+          payment_methods?: string[] | null
+          reference_name?: string | null
+          reference_phone?: string | null
+          registration_number?: string | null
+          turnaround_time?: string | null
+          year_established?: number | null
+          years_experience?: string | null
         }
         Relationships: []
       }
