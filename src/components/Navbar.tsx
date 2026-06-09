@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,15 +31,29 @@ const NAV_BY_ROLE: Record<UserRole, { to: string; label: string }[]> = {
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { role, userId } = useUserRole();
   const links = NAV_BY_ROLE[role];
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-card/70 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'border-b border-border/60 bg-background/70 backdrop-blur-xl shadow-sm'
+          : 'border-b border-transparent bg-background/40 backdrop-blur-md'
+      }`}
+    >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-glow">
+          <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary shadow-glow">
             <MapPin className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="text-xl font-display font-bold text-foreground">
@@ -47,13 +61,13 @@ const Navbar = () => {
           </span>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop Nav (centered) */}
         <div className="hidden items-center gap-1 md:flex">
           {links.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                 location.pathname === link.to
                   ? 'text-foreground'
                   : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
@@ -62,7 +76,7 @@ const Navbar = () => {
               {location.pathname === link.to && (
                 <motion.span
                   layoutId="nav-active"
-                  className="absolute inset-0 rounded-lg bg-secondary"
+                  className="absolute inset-0 rounded-full bg-secondary"
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
@@ -73,25 +87,35 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
-          {role === 'guest' || role === 'customer' ? <BookNowButton size="sm" variant="outline" /> : null}
+          {(role === 'guest' || role === 'customer') && (
+            <BookNowButton size="sm" className="rounded-full bg-primary hover:bg-primary/90 shadow-sm" />
+          )}
           {!userId ? (
             <>
-              <Link to="/auth"><Button variant="outline" size="sm">Log in</Button></Link>
-              <Link to="/vendor/onboarding"><Button size="sm">List Your Business</Button></Link>
+              <Link to="/auth" className="text-sm font-medium text-foreground hover:text-primary transition-colors">
+                Log in
+              </Link>
+              <Link to="/auth?mode=signup">
+                <Button size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">
+                  Sign Up
+                </Button>
+              </Link>
             </>
           ) : (
-            <Button size="sm" variant="ghost" onClick={async () => { await supabase.auth.signOut(); }}>
+            <Button size="sm" variant="ghost" className="rounded-full" onClick={async () => { await supabase.auth.signOut(); }}>
               Sign Out
             </Button>
           )}
         </div>
 
-        {/* Mobile toggle */}
+        {/* Mobile: Book Now stays visible */}
         <div className="flex items-center gap-1 md:hidden">
-          <ThemeToggle />
+          {(role === 'guest' || role === 'customer') && (
+            <BookNowButton size="sm" className="rounded-full bg-primary hover:bg-primary/90 h-9 px-3 text-xs" />
+          )}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="rounded-lg p-2 text-foreground"
+            className="rounded-full p-2 text-foreground hover:bg-secondary"
             aria-label="Toggle menu"
           >
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -106,7 +130,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-t border-border bg-card md:hidden"
+            className="border-t border-border bg-background md:hidden"
           >
             <div className="container mx-auto space-y-1 px-4 py-4">
               {links.map((link) => (
@@ -114,7 +138,7 @@ const Navbar = () => {
                   key={link.to}
                   to={link.to}
                   onClick={() => setIsOpen(false)}
-                  className={`block rounded-lg px-4 py-2.5 text-sm font-medium ${
+                  className={`block rounded-xl px-4 py-2.5 text-sm font-medium ${
                     location.pathname === link.to
                       ? 'bg-secondary text-secondary-foreground'
                       : 'text-muted-foreground'
@@ -123,25 +147,28 @@ const Navbar = () => {
                   {link.label}
                 </Link>
               ))}
-              {!userId ? (
-                <div className="flex gap-2 pt-3">
-                  <Link to="/auth" onClick={() => setIsOpen(false)} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">Log in</Button>
-                  </Link>
-                  <Link to="/vendor/onboarding" onClick={() => setIsOpen(false)} className="flex-1">
-                    <Button size="sm" className="w-full">List Your Business</Button>
-                  </Link>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="mt-3 w-full"
-                  onClick={async () => { await supabase.auth.signOut(); setIsOpen(false); }}
-                >
-                  Sign Out
-                </Button>
-              )}
+              <div className="flex items-center justify-between pt-3">
+                <ThemeToggle />
+                {!userId ? (
+                  <div className="flex gap-2">
+                    <Link to="/auth" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" size="sm" className="rounded-full">Log in</Button>
+                    </Link>
+                    <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>
+                      <Button size="sm" className="rounded-full bg-foreground text-background hover:bg-foreground/90">Sign Up</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full"
+                    onClick={async () => { await supabase.auth.signOut(); setIsOpen(false); }}
+                  >
+                    Sign Out
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
         )}
