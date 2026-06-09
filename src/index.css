@@ -110,7 +110,13 @@
 
 @layer utilities {
   .gradient-hero {
-    background: linear-gradient(135deg, hsl(var(--deep-blue)) 0%, hsl(var(--primary)) 50%, hsl(var(--cobalt)) 100%);
+    background: linear-gradient(135deg, hsl(var(--deep-blue)) 0%, hsl(var(--primary)) 55%, hsl(28 85% 52%) 100%);
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(24 88% 55%) 100%);
+  }
+  .gradient-fallback {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(200 85% 55%) 50%, hsl(36 90% 60%) 100%);
   }
   .gradient-card {
     background: linear-gradient(180deg, hsl(var(--card)) 0%, hsl(var(--muted)) 100%);
