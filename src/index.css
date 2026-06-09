@@ -6,45 +6,47 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 30% 12%;
+    --background: 36 33% 97%;
+    --foreground: 220 30% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 30% 12%;
+    --card-foreground: 220 30% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 30% 12%;
+    --popover-foreground: 220 30% 14%;
 
-    --primary: 217 71% 35%;
+    --primary: 214 78% 42%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 30% 95%;
-    --secondary-foreground: 217 71% 35%;
+    --secondary: 30 25% 94%;
+    --secondary-foreground: 214 78% 30%;
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 30 20% 95%;
+    --muted-foreground: 220 12% 45%;
 
-    --accent: 217 85% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 36 92% 55%;
+    --accent-foreground: 220 30% 14%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 78% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 25% 90%;
-    --input: 214 25% 90%;
-    --ring: 217 71% 35%;
+    --border: 30 18% 88%;
+    --input: 30 18% 88%;
+    --ring: 214 78% 42%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --sky: 200 80% 92%;
-    --sky-foreground: 217 71% 35%;
+    --sky: 210 70% 94%;
+    --sky-foreground: 214 78% 35%;
     --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
-    --cobalt: 217 85% 50%;
+    --warning: 36 92% 55%;
+    --warning-foreground: 220 30% 14%;
+    --amber: 36 92% 55%;
+    --amber-foreground: 220 30% 14%;
+    --cobalt: 210 90% 52%;
     --cobalt-foreground: 0 0% 100%;
-    --deep-blue: 217 71% 25%;
+    --deep-blue: 218 70% 28%;
     --deep-blue-foreground: 0 0% 100%;
 
     --sidebar-background: 0 0% 98%;
