@@ -67,6 +67,10 @@ export default {
           DEFAULT: "hsl(var(--cobalt))",
           foreground: "hsl(var(--cobalt-foreground))",
         },
+        amber: {
+          DEFAULT: "hsl(var(--amber))",
+          foreground: "hsl(var(--amber-foreground))",
+        },
         "deep-blue": {
           DEFAULT: "hsl(var(--deep-blue))",
           foreground: "hsl(var(--deep-blue-foreground))",
