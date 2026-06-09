@@ -32,12 +32,18 @@ type Mode = 'login' | 'signup-choose' | 'signup-form';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>('login');
+  const [params] = useSearchParams();
+  const initialMode: Mode = params.get('mode') === 'signup' ? 'signup-choose' : 'login';
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [accountType, setAccountType] = useState<AccountType>('customer');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [verifySent, setVerifySent] = useState<string | null>(null);
   const [form, setForm] = useState({ email: '', password: '', fullName: '' });
+
+  useEffect(() => {
+    if (params.get('mode') === 'signup') setMode('signup-choose');
+  }, [params]);
 
   const friendlyError = (msg: string): string => {
     const m = (msg || '').toLowerCase();
