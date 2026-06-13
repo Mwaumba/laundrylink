@@ -17,15 +17,19 @@ const NAV_BY_ROLE: Record<UserRole, { to: string; label: string }[]> = {
   customer: [
     { to: '/', label: 'Home' },
     { to: '/browse', label: 'Browse' },
+    { to: '/neighborhoods', label: 'Neighborhoods' },
     { to: '/bookings', label: 'My Bookings' },
   ],
   vendor: [
-    { to: '/vendor/dashboard', label: 'Dashboard' },
+    { to: '/', label: 'Home' },
+    { to: '/vendor/dashboard', label: 'My Dashboard' },
     { to: '/bookings', label: 'Bookings' },
   ],
   admin: [
-    { to: '/admin', label: 'Admin' },
+    { to: '/admin', label: 'Dashboard' },
     { to: '/browse', label: 'Vendors' },
+    { to: '/bookings', label: 'Bookings' },
+    { to: '/', label: 'Support' },
   ],
 };
 
@@ -63,26 +67,27 @@ const Navbar = () => {
 
         {/* Desktop Nav (centered) */}
         <div className="hidden items-center gap-1 md:flex">
-          {links.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                location.pathname === link.to
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-              }`}
-            >
-              {location.pathname === link.to && (
-                <motion.span
-                  layoutId="nav-active"
-                  className="absolute inset-0 rounded-full bg-secondary"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-              <span className="relative">{link.label}</span>
-            </Link>
-          ))}
+          {links.map((link) => {
+            const active = location.pathname === link.to;
+            return (
+              <Link
+                key={link.to + link.label}
+                to={link.to}
+                className={`relative px-3 py-2 text-sm font-medium transition-colors ${
+                  active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <span className="relative">{link.label}</span>
+                {active && (
+                  <motion.span
+                    layoutId="nav-active"
+                    className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-primary"
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="hidden items-center gap-2 md:flex">
