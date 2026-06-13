@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Eye, EyeOff, MailCheck, ArrowLeft, ShoppingBag, Briefcase, Loader2 } from 'lucide-react';
+import { MapPin, Eye, EyeOff, MailCheck, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -139,19 +139,23 @@ const Auth = () => {
               >
                 <div className="mb-6 text-center">
                   <h1 className="font-display text-2xl font-bold">Create your account</h1>
-                  <p className="mt-1 text-sm text-muted-foreground">What type of account are you creating?</p>
+                  <p className="mt-1 text-sm text-muted-foreground">What brings you to LaundryLink?</p>
                 </div>
-                <div className="space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <RoleCard
-                    icon={<ShoppingBag className="h-5 w-5" />}
-                    title="I'm booking services"
-                    desc="Find vetted cleaners, book pickups, track your orders."
+                    selected={accountType === 'customer'}
+                    emoji="🧺"
+                    accent="primary"
+                    title="I'm a customer"
+                    desc="Find vetted cleaners, book pickups, track orders."
                     onClick={() => { setAccountType('customer'); setMode('signup-form'); }}
                   />
                   <RoleCard
-                    icon={<Briefcase className="h-5 w-5" />}
-                    title="I'm listing my business"
-                    desc="Get discovered by customers and manage your bookings."
+                    selected={accountType === 'vendor'}
+                    emoji="🏪"
+                    accent="amber"
+                    title="I'm a vendor"
+                    desc="List your laundry business and reach new customers."
                     onClick={() => { setAccountType('vendor'); setMode('signup-form'); }}
                   />
                 </div>
@@ -296,18 +300,26 @@ const Auth = () => {
 };
 
 const RoleCard = ({
-  icon, title, desc, onClick,
-}: { icon: React.ReactNode; title: string; desc: string; onClick: () => void }) => (
+  emoji, title, desc, onClick, selected, accent,
+}: { emoji: string; title: string; desc: string; onClick: () => void; selected?: boolean; accent: 'primary' | 'amber' }) => (
   <button
     onClick={onClick}
-    className="group flex w-full items-start gap-3 rounded-xl border border-border bg-card/60 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-card hover:shadow-card-hover"
+    className={cn(
+      'group relative flex w-full flex-col items-start gap-3 overflow-hidden rounded-2xl border-2 bg-card p-5 text-left transition-all hover:-translate-y-0.5 hover:shadow-md',
+      selected ? 'border-primary shadow-md ring-2 ring-primary/20' : 'border-border hover:border-primary/40',
+    )}
   >
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-      {icon}
+    <div
+      className={cn(
+        'flex h-14 w-14 items-center justify-center rounded-2xl text-2xl shadow-sm',
+        accent === 'primary' ? 'bg-primary/10' : 'bg-amber/15',
+      )}
+    >
+      {emoji}
     </div>
     <div className="flex-1">
-      <p className="font-semibold text-foreground">{title}</p>
-      <p className="text-xs text-muted-foreground">{desc}</p>
+      <p className="font-display text-base font-semibold text-foreground">{title}</p>
+      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{desc}</p>
     </div>
   </button>
 );
@@ -319,7 +331,7 @@ const SocialButton = ({
     type="button"
     onClick={onClick}
     className={cn(
-      'flex w-full items-center justify-center gap-2.5 rounded-md border border-border bg-card/60 px-4 py-2.5 text-sm font-medium transition-colors',
+      'flex w-full items-center justify-center gap-2.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors',
       'hover:bg-secondary',
       disabled && 'cursor-not-allowed opacity-70',
     )}
