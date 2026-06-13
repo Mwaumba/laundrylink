@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Eye, EyeOff, MailCheck, ArrowLeft, ShoppingBag, Briefcase, Loader2 } from 'lucide-react';
+import { MapPin, Eye, EyeOff, MailCheck, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
