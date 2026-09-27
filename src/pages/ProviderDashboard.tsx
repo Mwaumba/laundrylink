@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { getCurrentPosition } from '@/lib/geo';
 
 interface Provider {
   id: string;
@@ -26,6 +27,7 @@ interface JobRow {
   budget: number | null;
   created_at: string;
   category_id: string | null;
+  distance_km: number | null;
 }
 
 // Open jobs come from list_open_jobs(), which hides the customer's contact
@@ -79,14 +81,23 @@ const ProviderDashboard = () => {
   const toggleAvailability = async (next: boolean) => {
     if (!provider) return;
     setOnline(next);
+    // Jobs are matched to where the provider is while online, so record it.
+    // Without permission we fall back to their base location.
+    const position = next ? await getCurrentPosition().catch(() => null) : null;
+    if (next && !position) toast.info('Using your base location to find jobs nearby.');
     const { error } = await supabase
       .from('independent_providers')
-      .update({ availability: next ? 'online' : 'offline' })
+      .update({
+        availability: next ? 'online' : 'offline',
+        ...(position ? { current_lat: position.lat, current_lng: position.lng } : {}),
+      })
       .eq('id', provider.id);
     if (error) {
       toast.error(error.message);
       setOnline(!next);
+      return;
     }
+    setJobs(await fetchOpenJobs());
   };
 
   const acceptJob = async (jobId: string) => {
@@ -120,7 +131,14 @@ const ProviderDashboard = () => {
     }
     const result = data as { ok: boolean; error?: string };
     if (!result.ok) {
-      toast.error(result.error === 'already_assigned' ? 'Sorry, another provider got it first.' : 'Could not accept');
+      const messages: Record<string, string> = {
+        already_assigned: 'Sorry, another provider got it first.',
+        job_expired: 'This job has expired.',
+      };
+      toast.error(messages[result.error ?? ''] ?? 'Could not accept');
+      if (result.error === 'already_assigned' || result.error === 'job_expired') {
+        setJobs((j) => j.filter((x) => x.id !== jobId));
+      }
     } else {
       toast.success('Job accepted!');
       setJobs((j) => j.filter((x) => x.id !== jobId));
@@ -198,7 +216,8 @@ const ProviderDashboard = () => {
                         </span>
                       )}
                       <span className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" />Exact address shared once you accept
+                        <MapPin className="h-3.5 w-3.5" />
+                        {j.distance_km != null ? `${j.distance_km} km away · ` : ''}Exact address shared once you accept
                       </span>
                     </div>
                     {j.notes && <p className="mt-2 text-sm">{j.notes}</p>}

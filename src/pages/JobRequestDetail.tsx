@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, Phone, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Phone, Loader2, CheckCircle2, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface JobRequest {
   id: string;
@@ -25,6 +27,21 @@ const JobRequestDetail = () => {
   const [job, setJob] = useState<JobRequest | null>(null);
   const [provider, setProvider] = useState<{ full_name: string; phone: string; rating: number } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [reposting, setReposting] = useState(false);
+
+  const repost = async () => {
+    if (!job) return;
+    setReposting(true);
+    const { data, error } = await supabase.rpc('rebroadcast_job', { _job_id: job.id });
+    setReposting(false);
+    const result = data as { ok: boolean; error?: string } | null;
+    if (error || !result?.ok) {
+      toast.error(error?.message ?? 'Could not post the job again');
+      return;
+    }
+    setJob({ ...job, status: 'broadcasting' });
+    toast.success('Job posted again to nearby providers');
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -99,6 +116,16 @@ const JobRequestDetail = () => {
             <div className="mb-4 rounded-lg border border-cobalt/30 bg-cobalt/5 p-4 text-sm">
               <Loader2 className="mr-2 inline h-4 w-4 animate-spin text-cobalt" />
               Broadcasting to nearby providers… we'll match you with the first one to accept.
+            </div>
+          )}
+
+          {job.status === 'expired' && (
+            <div className="mb-4 rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm">
+              <Clock className="mr-2 inline h-4 w-4 text-warning" />
+              No provider accepted this job in time.
+              <Button size="sm" className="mt-3 block" onClick={repost} disabled={reposting}>
+                {reposting ? 'Posting…' : 'Post again'}
+              </Button>
             </div>
           )}
 

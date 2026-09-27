@@ -4,13 +4,12 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Vendor } from '@/types';
 import { Link } from 'react-router-dom';
 import { hasCoordinates } from '@/lib/api/vendors';
+import { MAPBOX_TOKEN, NAIROBI_CENTER } from '@/lib/mapbox';
 
 interface MapViewProps {
   vendors: Vendor[];
   onVendorSelect?: (vendor: Vendor) => void;
 }
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoibXdhdW1iYSIsImEiOiJjbWloczc4Z3owZ2s0M2Rxc2diaW0xMjByIn0.-caL6iXLzJ_utwiLOPYGQg';
 
 const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -26,7 +25,7 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
-      center: [36.8219, -1.2864],
+      center: NAIROBI_CENTER,
       zoom: 12,
     });
 

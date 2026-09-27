@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { neighborhoods } from '@/data/neighborhoods';
+import LocationPicker from '@/components/LocationPicker';
 import { toast } from 'sonner';
 
 // NOTE: Two private Supabase Storage buckets must exist before this page works:
@@ -98,6 +99,8 @@ interface FormData {
   address: string;
   townArea: string;
   neighborhood: string;
+  lat: number | null;
+  lng: number | null;
   // step 5
   neighborhoodsServed: string[];
   // step 6
@@ -141,7 +144,7 @@ const emptyForm: FormData = {
   businessName: '', shortDescription: '', description: '',
   yearEstablished: '', yearsExperience: '',
   phone: '', whatsapp: '', email: '', website: '',
-  address: '', townArea: '', neighborhood: '',
+  address: '', townArea: '', neighborhood: '', lat: null, lng: null,
   neighborhoodsServed: [],
   selectedCategoryIds: [], servicePrices: {},
   priceRange: '', minimumOrder: '', turnaroundTime: '', paymentMethods: [],
@@ -253,6 +256,8 @@ const VendorOnboarding = () => {
         address: p.address ?? '',
         townArea: '',
         neighborhood: p.neighborhood_slug ?? '',
+        lat: p.lat ?? null,
+        lng: p.lng ?? null,
         neighborhoodsServed: p.neighborhoods_served ?? [],
         selectedCategoryIds: [],
         servicePrices: {},
@@ -344,6 +349,7 @@ const VendorOnboarding = () => {
       case 4:
         if (!data.neighborhood) return 'Please select a neighborhood.';
         if (!data.isIndividual && !data.address.trim()) return 'Physical address is required.';
+        if (!data.isIndividual && (data.lat == null || data.lng == null)) return 'Place a pin on the map where your shop is.';
         return null;
       case 5:
         return data.neighborhoodsServed.length > 0
@@ -423,6 +429,9 @@ const VendorOnboarding = () => {
               : [data.address, data.townArea].filter(Boolean).join(', '),
             neighborhood: neighborhoodName,
             neighborhood_slug: data.neighborhood,
+            // Individuals get their neighborhood's centre from the database.
+            lat: data.isIndividual ? null : data.lat,
+            lng: data.isIndividual ? null : data.lng,
           });
           break;
         case 5:
@@ -603,6 +612,7 @@ const VendorOnboarding = () => {
     if (form.businessName.trim().length < 3)   { toast.error('Name must be at least 3 characters.');  setStep(2);  return; }
     if (form.phone.trim().length < 7)          { toast.error('Please enter a valid phone number.');    setStep(3);  return; }
     if (!form.neighborhood)                    { toast.error('Please select a neighborhood.');         setStep(4);  return; }
+    if (!form.isIndividual && form.lat == null) { toast.error('Place a pin on the map where your shop is.'); setStep(4); return; }
     if (form.images.length === 0)              { toast.error('Please upload at least one photo.');     setStep(11); return; }
     if (!form.termsAgreed)                     { toast.error('Please agree to the Terms of Service.'); return; }
     if (!vendorId) return;
@@ -636,6 +646,8 @@ const VendorOnboarding = () => {
             : [form.address, form.townArea].filter(Boolean).join(', '),
           neighborhood: neighborhoodName,
           neighborhood_slug: form.neighborhood,
+          lat: form.isIndividual ? null : form.lat,
+          lng: form.isIndividual ? null : form.lng,
           service_tags,
           price_range: form.priceRange,
           minimum_order: form.minimumOrder || null,
@@ -983,9 +995,14 @@ const VendorOnboarding = () => {
                         ))}
                       </div>
                     </div>
-                    <div className="rounded-xl border border-border bg-muted/50 p-8 text-center">
-                      <MapPin className="mx-auto h-8 w-8 text-muted-foreground" />
-                      <p className="mt-2 text-sm text-muted-foreground">Map pin placement coming soon</p>
+                    <div className="space-y-2">
+                      <Label>Shop location on the map <Req /></Label>
+                      <p className="text-xs text-muted-foreground">Customers use this to find you, and it decides which pickups are near you.</p>
+                      <LocationPicker
+                        value={form.lat != null && form.lng != null ? { lat: form.lat, lng: form.lng } : null}
+                        onChange={(p) => setForm((prev) => ({ ...prev, lat: p.lat, lng: p.lng }))}
+                        fallbackCenter={neighborhoods.find((n) => n.slug === form.neighborhood) ?? null}
+                      />
                     </div>
                   </>
                 )}
