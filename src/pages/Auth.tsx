@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils';
  *  lovableproject.com domains).
  */
 
-type AccountType = 'customer' | 'vendor';
+type AccountType = 'customer' | 'vendor' | 'provider';
 type Mode = 'login' | 'signup-choose' | 'signup-form';
 
 const Auth = () => {
@@ -90,7 +90,11 @@ const Auth = () => {
 
         if (data.session) {
           toast.success('Account created!');
-          navigate(accountType === 'vendor' ? '/vendor/onboarding' : '/bookings');
+          navigate(
+            accountType === 'vendor' ? '/vendor/onboarding'
+              : accountType === 'provider' ? '/provider/onboarding'
+              : '/bookings',
+          );
         } else {
           setVerifySent(form.email.trim());
           toast.success('Check your email to verify your account before signing in.');
@@ -141,7 +145,7 @@ const Auth = () => {
                   <h1 className="font-display text-2xl font-bold">Create your account</h1>
                   <p className="mt-1 text-sm text-muted-foreground">What brings you to LaundryLink?</p>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3">
                   <RoleCard
                     selected={accountType === 'customer'}
                     emoji="🧺"
@@ -157,6 +161,14 @@ const Auth = () => {
                     title="I'm a vendor"
                     desc="List your laundry business and reach new customers."
                     onClick={() => { setAccountType('vendor'); setMode('signup-form'); }}
+                  />
+                  <RoleCard
+                    selected={accountType === 'provider'}
+                    emoji="🧽"
+                    accent="primary"
+                    title="I clean on my own"
+                    desc="Mama fua or mobile cleaner? Get on-demand jobs near you."
+                    onClick={() => { setAccountType('provider'); setMode('signup-form'); }}
                   />
                 </div>
                 <div className="mt-6 text-center text-sm text-muted-foreground">
@@ -187,13 +199,15 @@ const Auth = () => {
                 )}
                 <div className="mb-6 text-center">
                   <h1 className="font-display text-2xl font-bold">
-                    {mode === 'login' ? 'Welcome back' : accountType === 'vendor' ? 'Create business account' : 'Create your account'}
+                    {mode === 'login' ? 'Welcome back' : accountType === 'vendor' ? 'Create business account' : accountType === 'provider' ? 'Create provider account' : 'Create your account'}
                   </h1>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {mode === 'login'
                       ? 'Sign in to continue to LaundryLink'
                       : accountType === 'vendor'
                         ? "We'll guide you through listing your business next."
+                        : accountType === 'provider'
+                        ? "Next you'll set up your provider profile."
                         : 'Book trusted cleaners across Nairobi.'}
                   </p>
                 </div>
