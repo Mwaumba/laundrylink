@@ -26,6 +26,10 @@ const NAV_BY_ROLE: Record<UserRole, { to: string; label: string }[]> = {
     { to: '/vendor/dashboard', label: 'My Dashboard' },
     { to: '/bookings', label: 'Bookings' },
   ],
+  provider: [
+    { to: '/', label: 'Home' },
+    { to: '/provider/dashboard', label: 'Job Feed' },
+  ],
   admin: [
     { to: '/admin', label: 'Dashboard' },
     { to: '/browse', label: 'Vendors' },

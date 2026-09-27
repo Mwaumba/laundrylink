@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type UserRole = 'guest' | 'customer' | 'vendor' | 'admin';
+export type UserRole = 'guest' | 'customer' | 'vendor' | 'provider' | 'admin';
 
 interface RoleState {
   role: UserRole;
@@ -11,7 +11,8 @@ interface RoleState {
 
 /**
  * Determines the user's effective role.
- * Priority: admin > vendor (has vendor_profile) > customer (logged in) > guest.
+ * Priority: admin > vendor (has vendor_profile) > provider (has a provider
+ * profile, approved or not) > customer (logged in) > guest.
  */
 export const useUserRole = (): RoleState => {
   const [state, setState] = useState<RoleState>({ role: 'guest', userId: null, loading: true });
@@ -24,12 +25,13 @@ export const useUserRole = (): RoleState => {
         if (active) setState({ role: 'guest', userId: null, loading: false });
         return;
       }
-      const [{ data: roles }, { data: vendor }] = await Promise.all([
+      const [{ data: roles }, { data: vendor }, { data: provider }] = await Promise.all([
         supabase.from('user_roles').select('role').eq('user_id', userId),
         supabase.from('vendor_profiles').select('id').eq('user_id', userId).maybeSingle(),
+        supabase.from('independent_providers').select('id').eq('user_id', userId).maybeSingle(),
       ]);
       const isAdmin = (roles ?? []).some((r: any) => r.role === 'admin');
-      const role: UserRole = isAdmin ? 'admin' : vendor ? 'vendor' : 'customer';
+      const role: UserRole = isAdmin ? 'admin' : vendor ? 'vendor' : provider ? 'provider' : 'customer';
       if (active) setState({ role, userId, loading: false });
     };
 

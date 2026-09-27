@@ -19,6 +19,8 @@ interface Row {
   vendor_id: string | null;
   assigned_provider_id: string | null;
   category_id: string | null;
+  /** Shop bookings live in `bookings`; on-demand jobs in `job_requests`. */
+  kind: 'booking' | 'job';
 }
 
 interface PartyMap { [id: string]: { name: string; kind: 'vendor' | 'provider' } }
@@ -30,6 +32,9 @@ const STATUS_TONE: Record<string, string> = {
   in_progress: 'bg-cobalt/15 text-cobalt border-cobalt/30',
   completed: 'bg-success/15 text-success border-success/30',
   cancelled: 'bg-destructive/15 text-destructive border-destructive/30',
+  broadcasting: 'bg-warning/15 text-warning border-warning/30',
+  assigned: 'bg-sky text-sky-foreground border-sky/40',
+  expired: 'bg-muted text-muted-foreground border-border',
 };
 
 const MyBookings = () => {
@@ -45,12 +50,20 @@ const MyBookings = () => {
         navigate('/auth?redirect=/bookings');
         return;
       }
-      const { data } = await supabase
-        .from('bookings')
-        .select('*')
-        .eq('customer_id', user.id)
-        .order('created_at', { ascending: false });
-      const list = (data ?? []) as Row[];
+      const [{ data: bookings }, { data: jobs }] = await Promise.all([
+        supabase
+          .from('bookings')
+          .select('id, status, scheduled_at, address, created_at, vendor_id, assigned_provider_id, category_id')
+          .eq('customer_id', user.id),
+        supabase
+          .from('job_requests')
+          .select('id, status, scheduled_at, address, created_at, assigned_provider_id, category_id')
+          .eq('customer_id', user.id),
+      ]);
+      const list: Row[] = [
+        ...(bookings ?? []).map((b) => ({ ...b, kind: 'booking' as const })),
+        ...(jobs ?? []).map((j) => ({ ...j, vendor_id: null, kind: 'job' as const })),
+      ].sort((a, b) => b.created_at.localeCompare(a.created_at));
       setRows(list);
 
       // Fetch assigned party names in batch.
@@ -126,7 +139,7 @@ const MyBookings = () => {
                 transition={{ delay: i * 0.04 }}
               >
                 <Link
-                  to={`/bookings/${r.id}`}
+                  to={r.kind === 'job' ? `/jobs/${r.id}` : `/bookings/${r.id}`}
                   className="group flex items-center gap-4 rounded-2xl border border-border bg-card p-4 shadow-card transition-all hover:border-cobalt/40 hover:shadow-card-hover"
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky">
@@ -150,7 +163,7 @@ const MyBookings = () => {
                             </span>
                           );
                         }
-                        if (r.status === 'requested' || r.status === 'pending') {
+                        if (r.status === 'requested' || r.status === 'pending' || r.status === 'broadcasting') {
                           return <span className="text-xs italic text-muted-foreground">· Awaiting provider</span>;
                         }
                         return null;

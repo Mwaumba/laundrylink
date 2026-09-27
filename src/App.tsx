@@ -42,11 +42,11 @@ const App = () => (
           <Route path="/vendor/onboarding" element={<VendorOnboarding />} />
           <Route path="/vendor/onboarding/pending" element={<VendorOnboardingPending />} />
           <Route path="/vendor/dashboard" element={<RoleGuard allow={['vendor', 'admin']}><VendorDashboard /></RoleGuard>} />
-          <Route path="/bookings" element={<RoleGuard allow={['customer', 'vendor', 'admin']}><MyBookings /></RoleGuard>} />
-          <Route path="/bookings/:id" element={<RoleGuard allow={['customer', 'vendor', 'admin']}><BookingDetail /></RoleGuard>} />
+          <Route path="/bookings" element={<RoleGuard allow={['customer', 'vendor', 'provider', 'admin']}><MyBookings /></RoleGuard>} />
+          <Route path="/bookings/:id" element={<RoleGuard allow={['customer', 'vendor', 'provider', 'admin']}><BookingDetail /></RoleGuard>} />
           <Route path="/jobs/:id" element={<JobRequestDetail />} />
           <Route path="/provider/onboarding" element={<ProviderOnboarding />} />
-          <Route path="/provider/dashboard" element={<ProviderDashboard />} />
+          <Route path="/provider/dashboard" element={<RoleGuard allow={['provider', 'admin']}><ProviderDashboard /></RoleGuard>} />
           <Route path="/admin" element={<RoleGuard allow={['admin']}><AdminDashboard /></RoleGuard>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
