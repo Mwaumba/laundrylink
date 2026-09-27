@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 import VendorCard from '@/components/VendorCard';
 import FilterBar from '@/components/FilterBar';
 import MapView from '@/components/MapView';
-import { vendors } from '@/data/vendors';
+import { useVendors } from '@/hooks/useVendors';
 import { Button } from '@/components/ui/button';
 
 const Browse = () => {
@@ -21,6 +21,7 @@ const Browse = () => {
   const [pickupOnly, setPickupOnly] = useState(false);
   const [openNow, setOpenNow] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map' | 'split'>('split');
+  const { data: vendors = [], isLoading, isError } = useVendors();
 
   const filtered = useMemo(() => {
     return vendors.filter((v) => {
@@ -32,7 +33,7 @@ const Browse = () => {
       if (openNow && v.availability === 'fully-booked') return false;
       return true;
     });
-  }, [searchQuery, selectedNeighborhood, selectedTags, pickupOnly, openNow]);
+  }, [vendors, searchQuery, selectedNeighborhood, selectedTags, pickupOnly, openNow]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -85,7 +86,7 @@ const Browse = () => {
         />
 
         <div className="mt-2 text-sm text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? 'vendor' : 'vendors'} found
+          {isLoading ? 'Loading vendors…' : `${filtered.length} ${filtered.length === 1 ? 'vendor' : 'vendors'} found`}
         </div>
 
         <div className={`mt-4 ${viewMode === 'split' ? 'flex gap-6' : ''}`}>
@@ -104,10 +105,10 @@ const Browse = () => {
                   </motion.div>
                 ))}
               </div>
-              {filtered.length === 0 && (
+              {!isLoading && filtered.length === 0 && (
                 <div className="py-20 text-center">
-                  <p className="text-lg font-medium text-foreground">No vendors found</p>
-                  <p className="mt-1 text-muted-foreground">Try adjusting your filters</p>
+                  <p className="text-lg font-medium text-foreground">{isError ? 'Could not load vendors' : 'No vendors found'}</p>
+                  <p className="mt-1 text-muted-foreground">{isError ? 'Please refresh and try again' : 'Try adjusting your filters'}</p>
                 </div>
               )}
             </div>

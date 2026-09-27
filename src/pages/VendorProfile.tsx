@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookNowButton from '@/components/BookNowButton';
-import { vendors } from '@/data/vendors';
+import { useVendor } from '@/hooks/useVendors';
 import { AvailabilityStatus } from '@/types';
 
 const availabilityConfig: Record<AvailabilityStatus, { label: string; className: string; dot: string }> = {
@@ -24,7 +24,17 @@ const badgeIcons: Record<string, React.ReactNode> = {
 
 const VendorProfile = () => {
   const { slug } = useParams();
-  const vendor = vendors.find((v) => v.slug === slug);
+  const { data: vendor, isLoading } = useVendor(slug);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading…</div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!vendor) {
     return (
@@ -68,7 +78,7 @@ const VendorProfile = () => {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Star className="h-4 w-4 fill-warning text-warning" />
-                  <span className="text-sm font-semibold text-primary-foreground">{vendor.rating}</span>
+                  <span className="text-sm font-semibold text-primary-foreground">{vendor.rating.toFixed(1)}</span>
                   <span className="text-sm">({vendor.reviewCount} reviews)</span>
                 </div>
               </div>
@@ -149,6 +159,9 @@ const VendorProfile = () => {
                 Operating Hours
               </h2>
               <div className="mt-3 space-y-1.5">
+                {vendor.businessHours.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Hours not listed yet</p>
+                )}
                 {vendor.businessHours.map((h) => (
                   <div key={h.day} className="flex items-center justify-between text-sm">
                     <span className="text-foreground font-medium">{h.day}</span>
@@ -168,6 +181,9 @@ const VendorProfile = () => {
                 Reviews ({vendor.reviewCount})
               </h2>
               <div className="mt-4 space-y-4">
+                {vendor.reviews.length === 0 && (
+                  <p className="text-sm text-muted-foreground">No reviews yet</p>
+                )}
                 {vendor.reviews.map((review) => (
                   <div key={review.id} className="rounded-xl border border-border bg-card p-4">
                     <div className="flex items-center justify-between">
@@ -202,24 +218,30 @@ const VendorProfile = () => {
                 )}
 
                 <div className="mt-4 space-y-2">
-                  <a href={`https://wa.me/${vendor.whatsapp}`} target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground">
-                      <MessageCircle className="h-4 w-4" />
-                      WhatsApp
-                    </Button>
-                  </a>
-                  <a href={`tel:${vendor.phone}`}>
-                    <Button variant="outline" className="w-full gap-2 mt-2">
-                      <Phone className="h-4 w-4" />
-                      Call Now
-                    </Button>
-                  </a>
-                  <a href={`mailto:${vendor.email}`}>
-                    <Button variant="outline" className="w-full gap-2 mt-2">
-                      <Mail className="h-4 w-4" />
-                      Email
-                    </Button>
-                  </a>
+                  {vendor.whatsapp && (
+                    <a href={`https://wa.me/${vendor.whatsapp}`} target="_blank" rel="noopener noreferrer">
+                      <Button className="w-full gap-2 bg-success hover:bg-success/90 text-success-foreground">
+                        <MessageCircle className="h-4 w-4" />
+                        WhatsApp
+                      </Button>
+                    </a>
+                  )}
+                  {vendor.phone && (
+                    <a href={`tel:${vendor.phone}`}>
+                      <Button variant="outline" className="w-full gap-2 mt-2">
+                        <Phone className="h-4 w-4" />
+                        Call Now
+                      </Button>
+                    </a>
+                  )}
+                  {vendor.email && (
+                    <a href={`mailto:${vendor.email}`}>
+                      <Button variant="outline" className="w-full gap-2 mt-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </Button>
+                    </a>
+                  )}
                 </div>
               </div>
 
@@ -240,7 +262,7 @@ const VendorProfile = () => {
                     <div className="text-xs text-muted-foreground">Inquiries</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl font-bold text-foreground">{vendor.responseTime}</div>
+                    <div className="text-xl font-bold text-foreground">{vendor.responseTime || '—'}</div>
                     <div className="text-xs text-muted-foreground">Response</div>
                   </div>
                 </div>

@@ -79,7 +79,7 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Star className="h-4 w-4 fill-amber text-amber" />
-              <span className="text-sm font-semibold text-foreground">{vendor.rating}</span>
+              <span className="text-sm font-semibold text-foreground">{vendor.rating.toFixed(1)}</span>
               <span className="text-xs text-muted-foreground">({vendor.reviewCount})</span>
             </div>
             {vendor.responseMinutes <= 5 && (

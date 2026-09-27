@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Eye, Heart, MessageSquare, Star, Clock,
-  Settings, Bell, TrendingUp, Phone, Mail, MapPin, Edit2, Save, X
+  Settings, Bell, TrendingUp, Phone, Mail, MapPin, Edit2, Save, X, CalendarCheck
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
+import ShopBookingsTab from '@/components/ShopBookingsTab';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -175,6 +176,7 @@ const VendorDashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 w-full justify-start">
             <TabsTrigger value="overview" className="gap-2"><LayoutDashboard className="h-4 w-4" /> Overview</TabsTrigger>
+            <TabsTrigger value="bookings" className="gap-2"><CalendarCheck className="h-4 w-4" /> Bookings</TabsTrigger>
             <TabsTrigger value="inquiries" className="gap-2"><MessageSquare className="h-4 w-4" /> Inquiries</TabsTrigger>
             <TabsTrigger value="profile" className="gap-2"><Settings className="h-4 w-4" /> Profile</TabsTrigger>
           </TabsList>
@@ -263,6 +265,11 @@ const VendorDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Bookings */}
+          <TabsContent value="bookings">
+            <ShopBookingsTab vendorId={vendor.id} />
           </TabsContent>
 
           {/* Inquiries */}
