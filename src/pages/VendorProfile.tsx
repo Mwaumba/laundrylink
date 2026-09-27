@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, MapPin, Clock, Truck, Phone, MessageCircle, Mail, Zap, CheckCircle, Shield, Award, ArrowLeft, Heart, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BookNowButton from '@/components/BookNowButton';
 import { useVendor } from '@/hooks/useVendors';
+import { supabase } from '@/integrations/supabase/client';
 import { AvailabilityStatus } from '@/types';
 
 const availabilityConfig: Record<AvailabilityStatus, { label: string; className: string; dot: string }> = {
@@ -25,6 +27,19 @@ const badgeIcons: Record<string, React.ReactNode> = {
 const VendorProfile = () => {
   const { slug } = useParams();
   const { data: vendor, isLoading } = useVendor(slug);
+
+  // Count one profile view per shop per browser session.
+  useEffect(() => {
+    if (!vendor?.id) return;
+    const key = `viewed-vendor-${vendor.id}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch {
+      // Storage unavailable: still count the view.
+    }
+    supabase.rpc('record_vendor_view', { _vendor_id: vendor.id });
+  }, [vendor?.id]);
 
   if (isLoading) {
     return (
