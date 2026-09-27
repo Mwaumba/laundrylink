@@ -29,6 +29,17 @@ const JobRequestDetail = () => {
   const [loading, setLoading] = useState(true);
   const [reposting, setReposting] = useState(false);
 
+  const cancel = async () => {
+    if (!job || !window.confirm('Cancel this job?')) return;
+    const { error } = await supabase.from('job_requests').update({ status: 'cancelled' }).eq('id', job.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setJob({ ...job, status: 'cancelled' });
+    toast.success('Job cancelled');
+  };
+
   const repost = async () => {
     if (!job) return;
     setReposting(true);
@@ -146,6 +157,12 @@ const JobRequestDetail = () => {
             <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> {job.address}</div>
             {job.notes && <p className="rounded-md bg-muted p-3 text-muted-foreground">{job.notes}</p>}
           </div>
+
+          {(broadcasting || assigned) && (
+            <Button variant="outline" size="sm" className="mt-4" onClick={cancel}>
+              Cancel job
+            </Button>
+          )}
         </div>
       </div>
       <Footer />

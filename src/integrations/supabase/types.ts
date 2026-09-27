@@ -1017,6 +1017,8 @@ export type Database = {
         }[]
       }
       rebroadcast_job: { Args: { _job_id: string }; Returns: Json }
+      record_vendor_view: { Args: { _vendor_id: string }; Returns: undefined }
+      release_job: { Args: { _job_id: string }; Returns: Json }
       update_booking_status: {
         Args: {
           _booking_id: string

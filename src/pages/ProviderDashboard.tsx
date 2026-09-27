@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Sparkles, MapPin, Calendar, CheckCircle, Power } from 'lucide-react';
+import { Loader2, Sparkles, MapPin, Calendar, CheckCircle, Power, Phone, Briefcase } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -30,6 +30,27 @@ interface JobRow {
   distance_km: number | null;
 }
 
+interface MyJob {
+  id: string;
+  scheduled_at: string | null;
+  address: string;
+  notes: string | null;
+  customer_name: string | null;
+  customer_phone: string | null;
+}
+
+// Jobs this provider has accepted and not finished. Full details are visible
+// once assigned.
+const fetchMyJobs = async (providerId: string) => {
+  const { data } = await supabase
+    .from('job_requests')
+    .select('id, scheduled_at, address, notes, customer_name, customer_phone')
+    .eq('assigned_provider_id', providerId)
+    .eq('status', 'assigned')
+    .order('scheduled_at', { ascending: true, nullsFirst: false });
+  return (data ?? []) as MyJob[];
+};
+
 // Open jobs come from list_open_jobs(), which hides the customer's contact
 // details and exact address until the provider has accepted the job.
 const fetchOpenJobs = async () => {
@@ -41,6 +62,7 @@ const ProviderDashboard = () => {
   const navigate = useNavigate();
   const [provider, setProvider] = useState<Provider | null>(null);
   const [jobs, setJobs] = useState<JobRow[]>([]);
+  const [myJobs, setMyJobs] = useState<MyJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [online, setOnline] = useState(false);
 
@@ -63,7 +85,9 @@ const ProviderDashboard = () => {
       setProvider(p as any);
       setOnline(p.availability === 'online');
 
-      setJobs(await fetchOpenJobs());
+      const [open, mine] = await Promise.all([fetchOpenJobs(), fetchMyJobs(p.id)]);
+      setJobs(open);
+      setMyJobs(mine);
 
       setLoading(false);
     };
@@ -142,7 +166,31 @@ const ProviderDashboard = () => {
     } else {
       toast.success('Job accepted!');
       setJobs((j) => j.filter((x) => x.id !== jobId));
+      setMyJobs(await fetchMyJobs(provider.id));
     }
+  };
+
+  const completeJob = async (jobId: string) => {
+    const { error } = await supabase.from('job_requests').update({ status: 'completed' }).eq('id', jobId);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success('Job marked done');
+    setMyJobs((j) => j.filter((x) => x.id !== jobId));
+    setProvider((p) => (p ? { ...p, jobs_completed: (p.jobs_completed ?? 0) + 1 } : p));
+  };
+
+  const releaseJob = async (jobId: string) => {
+    if (!window.confirm("Hand this job back? We'll find the customer another provider.")) return;
+    const { data, error } = await supabase.rpc('release_job', { _job_id: jobId });
+    const result = data as { ok: boolean } | null;
+    if (error || !result?.ok) {
+      toast.error(error?.message ?? 'Could not hand the job back');
+      return;
+    }
+    toast.success('Job handed back');
+    setMyJobs((j) => j.filter((x) => x.id !== jobId));
   };
 
   if (loading) {
@@ -190,6 +238,45 @@ const ProviderDashboard = () => {
             <p className="mt-1 text-2xl font-bold">{jobs.length}</p>
           </div>
         </div>
+
+        {myJobs.length > 0 && (
+          <>
+            <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-semibold">
+              <Briefcase className="h-5 w-5 text-cobalt" /> My Jobs
+            </h2>
+            <div className="mb-8 space-y-3">
+              {myJobs.map((j) => (
+                <div key={j.id} className="rounded-xl border border-success/30 bg-card p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="flex-1 space-y-1 text-sm">
+                      <p className="font-semibold">{j.customer_name ?? 'Customer'}</p>
+                      <p className="flex items-center gap-1 text-muted-foreground"><MapPin className="h-3.5 w-3.5" />{j.address}</p>
+                      {j.scheduled_at && (
+                        <p className="flex items-center gap-1 text-muted-foreground">
+                          <Calendar className="h-3.5 w-3.5" />{new Date(j.scheduled_at).toLocaleString()}
+                        </p>
+                      )}
+                      {j.customer_phone && (
+                        <a href={`tel:${j.customer_phone}`} className="inline-flex items-center gap-1 text-cobalt hover:underline">
+                          <Phone className="h-3.5 w-3.5" />{j.customer_phone}
+                        </a>
+                      )}
+                      {j.notes && <p className="pt-1">{j.notes}</p>}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Button onClick={() => completeJob(j.id)} className="gap-1.5">
+                        <CheckCircle className="h-4 w-4" /> Mark done
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => releaseJob(j.id)}>
+                        Can't make it
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-semibold">
           <Sparkles className="h-5 w-5 text-cobalt" /> Live Job Feed
