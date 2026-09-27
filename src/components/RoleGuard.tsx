@@ -36,6 +36,7 @@ const RoleGuard = ({ allow, children, fallback }: Props) => {
   const home =
     role === 'admin' ? '/admin' :
     role === 'vendor' ? '/vendor/dashboard' :
+    role === 'provider' ? '/provider/dashboard' :
     '/';
   return <Navigate to={home} replace />;
 };

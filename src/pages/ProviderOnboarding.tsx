@@ -82,9 +82,7 @@ const ProviderOnboarding = () => {
       const { error: svcErr } = await supabase.from('provider_services').insert(services);
       if (svcErr) throw svcErr;
 
-      // Add provider role
-      await supabase.from('user_roles').insert({ user_id: user.id, role: 'provider' });
-
+      // The provider role is granted by the database once an admin approves.
       toast.success('Profile submitted! An admin will review shortly.');
       navigate('/provider/dashboard');
     } catch (err: any) {
