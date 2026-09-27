@@ -917,6 +917,31 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_app_request: { Args: never; Returns: boolean }
+      list_open_jobs: {
+        Args: never
+        Returns: {
+          approx_lat: number
+          approx_lng: number
+          budget: number
+          category_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          notes: string
+          scheduled_at: string
+          status: Database["public"]["Enums"]["job_request_status"]
+        }[]
+      }
+      update_booking_status: {
+        Args: {
+          _booking_id: string
+          _final_price?: number
+          _note?: string
+          _status: Database["public"]["Enums"]["booking_status"]
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "provider"

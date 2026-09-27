@@ -153,9 +153,14 @@ const BookingDetail = () => {
 
   const cancel = async () => {
     if (!booking) return;
-    const { error } = await supabase
-      .from('bookings').update({ status: 'cancelled', cancelled_reason: 'Cancelled by customer' }).eq('id', booking.id);
+    const { data, error } = await supabase.rpc('update_booking_status', {
+      _booking_id: booking.id,
+      _status: 'cancelled',
+      _note: 'Cancelled by customer',
+    });
+    const result = data as { ok: boolean; error?: string } | null;
     if (error) toast.error(error.message);
+    else if (!result?.ok) toast.error('This booking can no longer be cancelled');
     else toast.success('Booking cancelled');
   };
 
