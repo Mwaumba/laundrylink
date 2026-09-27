@@ -18,6 +18,21 @@ AS $$
   SELECT current_user IN ('anon', 'authenticated')
 $$;
 
+-- Review audit columns (submitted_at, reviewed_at, reviewed_by,
+-- rejection_reason) are added by the admin approvals migration and set only by
+-- its functions and triggers. They're compared through jsonb so these guards
+-- work whether or not that migration has run yet.
+CREATE OR REPLACE FUNCTION public.review_columns_changed(_old jsonb, _new jsonb)
+RETURNS boolean
+LANGUAGE sql
+IMMUTABLE
+AS $$
+  SELECT (_old -> 'submitted_at')     IS DISTINCT FROM (_new -> 'submitted_at')
+      OR (_old -> 'reviewed_at')      IS DISTINCT FROM (_new -> 'reviewed_at')
+      OR (_old -> 'reviewed_by')      IS DISTINCT FROM (_new -> 'reviewed_by')
+      OR (_old -> 'rejection_reason') IS DISTINCT FROM (_new -> 'rejection_reason')
+$$;
+
 -- ---------- S1: vendors can't approve themselves ----------
 CREATE OR REPLACE FUNCTION public.guard_vendor_profile_write()
 RETURNS trigger
@@ -40,6 +55,7 @@ BEGIN
     NEW.profile_views   := 0;
     NEW.favorites_count := 0;
     NEW.inquiries_count := 0;
+    NEW := jsonb_populate_record(NEW, '{"submitted_at": null, "reviewed_at": null, "reviewed_by": null, "rejection_reason": null}');
     RETURN NEW;
   END IF;
 
@@ -51,8 +67,9 @@ BEGIN
   OR NEW.profile_views   IS DISTINCT FROM OLD.profile_views
   OR NEW.favorites_count IS DISTINCT FROM OLD.favorites_count
   OR NEW.inquiries_count IS DISTINCT FROM OLD.inquiries_count
+  OR public.review_columns_changed(to_jsonb(OLD), to_jsonb(NEW))
   THEN
-    RAISE EXCEPTION 'Only admins can change verification, featuring, ratings or counters'
+    RAISE EXCEPTION 'Only admins can change verification, featuring, ratings, counters or review details'
       USING ERRCODE = '42501';
   END IF;
 
@@ -95,6 +112,7 @@ BEGIN
     NEW.rating         := 0;
     NEW.review_count   := 0;
     NEW.jobs_completed := 0;
+    NEW := jsonb_populate_record(NEW, '{"submitted_at": null, "reviewed_at": null, "reviewed_by": null, "rejection_reason": null}');
     RETURN NEW;
   END IF;
 
@@ -102,8 +120,9 @@ BEGIN
   OR NEW.rating         IS DISTINCT FROM OLD.rating
   OR NEW.review_count   IS DISTINCT FROM OLD.review_count
   OR NEW.jobs_completed IS DISTINCT FROM OLD.jobs_completed
+  OR public.review_columns_changed(to_jsonb(OLD), to_jsonb(NEW))
   THEN
-    RAISE EXCEPTION 'Only admins can change ratings or job counters' USING ERRCODE = '42501';
+    RAISE EXCEPTION 'Only admins can change ratings, job counters or review details' USING ERRCODE = '42501';
   END IF;
 
   IF NEW.status IS DISTINCT FROM OLD.status AND NOT (
