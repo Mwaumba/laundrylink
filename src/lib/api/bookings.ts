@@ -70,17 +70,40 @@ export async function fetchShopBookings(client: Client, vendorId: string): Promi
   return (data ?? []) as ShopBooking[];
 }
 
-export async function setBookingStatus(client: Client, bookingId: string, status: BookingStatus): Promise<void> {
-  const { error } = await client.from('bookings').update({ status }).eq('id', bookingId);
+/**
+ * Moves a booking to a new status through the update_booking_status RPC, which
+ * checks the caller and the allowed transitions. For 'cancelled', note is saved
+ * as the cancellation reason. Falls back to a direct update while the RPC is
+ * not deployed yet.
+ */
+async function changeStatus(client: Client, bookingId: string, status: BookingStatus, note?: string): Promise<void> {
+  // The RPC is newer than the generated types, hence the loose call.
+  const rpc = client.rpc.bind(client) as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: { ok: boolean; error?: string } | null; error: { code?: string; message: string } | null }>;
+  const { data, error } = await rpc('update_booking_status', {
+    _booking_id: bookingId,
+    _status: status,
+    ...(note ? { _note: note } : {}),
+  });
+
+  if (error?.code === 'PGRST202') {
+    const patch = status === 'cancelled' ? { status, cancelled_reason: note ?? null } : { status };
+    const res = await client.from('bookings').update(patch).eq('id', bookingId);
+    if (res.error) throw res.error;
+    return;
+  }
   if (error) throw error;
+  if (data && !data.ok) throw new Error(data.error ?? 'Could not update booking');
 }
 
-export async function declineBooking(client: Client, bookingId: string, reason: string): Promise<void> {
-  const { error } = await client
-    .from('bookings')
-    .update({ status: 'cancelled', cancelled_reason: reason || 'Declined by shop' })
-    .eq('id', bookingId);
-  if (error) throw error;
+export function setBookingStatus(client: Client, bookingId: string, status: BookingStatus): Promise<void> {
+  return changeStatus(client, bookingId, status);
+}
+
+export function declineBooking(client: Client, bookingId: string, reason: string): Promise<void> {
+  return changeStatus(client, bookingId, 'cancelled', reason || 'Declined by shop');
 }
 
 /**
