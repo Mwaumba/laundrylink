@@ -22,13 +22,18 @@ interface JobRow {
   id: string;
   status: string;
   scheduled_at: string | null;
-  address: string;
   notes: string | null;
   budget: number | null;
   created_at: string;
   category_id: string | null;
-  customer_name: string | null;
 }
+
+// Open jobs come from list_open_jobs(), which hides the customer's contact
+// details and exact address until the provider has accepted the job.
+const fetchOpenJobs = async () => {
+  const { data } = await supabase.rpc('list_open_jobs');
+  return (data ?? []) as JobRow[];
+};
 
 const ProviderDashboard = () => {
   const navigate = useNavigate();
@@ -56,35 +61,19 @@ const ProviderDashboard = () => {
       setProvider(p as any);
       setOnline(p.availability === 'online');
 
-      const { data: jobData } = await supabase
-        .from('job_requests')
-        .select('*')
-        .eq('status', 'broadcasting')
-        .order('created_at', { ascending: false });
-      setJobs((jobData ?? []) as JobRow[]);
+      setJobs(await fetchOpenJobs());
 
       setLoading(false);
     };
     load();
 
-    // Realtime: new broadcasting jobs
-    const channel = supabase
-      .channel('provider-jobs')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'job_requests' },
-        () => {
-          supabase
-            .from('job_requests')
-            .select('*')
-            .eq('status', 'broadcasting')
-            .order('created_at', { ascending: false })
-            .then(({ data }) => setJobs((data ?? []) as JobRow[]));
-        },
-      )
-      .subscribe();
+    // Providers can no longer read open job rows directly, so realtime
+    // changes on job_requests don't reach them; poll instead.
+    const interval = setInterval(() => {
+      fetchOpenJobs().then(setJobs);
+    }, 15000);
 
-    return () => { supabase.removeChannel(channel); };
+    return () => clearInterval(interval);
   }, [navigate]);
 
   const toggleAvailability = async (next: boolean) => {
@@ -209,7 +198,7 @@ const ProviderDashboard = () => {
                         </span>
                       )}
                       <span className="flex items-center gap-1 text-muted-foreground">
-                        <MapPin className="h-3.5 w-3.5" />{j.address}
+                        <MapPin className="h-3.5 w-3.5" />Exact address shared once you accept
                       </span>
                     </div>
                     {j.notes && <p className="mt-2 text-sm">{j.notes}</p>}
