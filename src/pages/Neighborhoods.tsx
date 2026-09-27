@@ -3,10 +3,11 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { neighborhoods } from '@/data/neighborhoods';
-import { vendors } from '@/data/vendors';
+import { useVendors } from '@/hooks/useVendors';
 import { MapPin, ChevronRight } from 'lucide-react';
 
 const Neighborhoods = () => {
+  const { data: vendors = [] } = useVendors();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

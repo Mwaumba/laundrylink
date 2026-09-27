@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { neighborhoods } from '@/data/neighborhoods';
-import { serviceTags } from '@/data/serviceTags';
+import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { useState } from 'react';
 
 interface FilterBarProps {
@@ -30,6 +30,9 @@ const FilterBar = (props: FilterBarProps) => {
     openNow, onOpenNowChange,
   } = props;
   const [open, setOpen] = useState(false);
+  // Vendors store their service category names in service_tags.
+  const { categories } = useServiceCategories();
+  const serviceTags = categories.map((c) => c.name);
 
   const toggleTag = (tag: string) => {
     onTagsChange(

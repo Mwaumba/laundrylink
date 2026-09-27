@@ -3,6 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Vendor } from '@/types';
 import { Link } from 'react-router-dom';
+import { hasCoordinates } from '@/lib/api/vendors';
 
 interface MapViewProps {
   vendors: Vendor[];
@@ -42,8 +43,9 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
 
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
+    const mappable = vendors.filter(hasCoordinates);
 
-    vendors.forEach((vendor) => {
+    mappable.forEach((vendor) => {
       const statusColor =
         vendor.availability === 'accepting'
           ? 'hsl(152, 60%, 42%)'
@@ -75,9 +77,9 @@ const MapView = ({ vendors, onVendorSelect }: MapViewProps) => {
       markersRef.current.push(marker);
     });
 
-    if (vendors.length > 1) {
+    if (mappable.length > 1) {
       const bounds = new mapboxgl.LngLatBounds();
-      vendors.forEach((v) => bounds.extend([v.lng, v.lat]));
+      mappable.forEach((v) => bounds.extend([v.lng, v.lat]));
       map.current.fitBounds(bounds, { padding: 60 });
     }
   }, [vendors, onVendorSelect]);

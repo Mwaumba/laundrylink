@@ -17,6 +17,8 @@ import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
+import { useVendors } from '@/hooks/useVendors';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type ProviderType = 'vendor' | 'independent';
 
@@ -50,6 +52,10 @@ const BookNowModal = ({
 }: BookNowModalProps) => {
   const navigate = useNavigate();
   const { categories } = useServiceCategories();
+  // Only needed to pick a shop when the modal was opened without one.
+  const { data: vendors = [] } = useVendors();
+  const [pickedVendorId, setPickedVendorId] = useState('');
+  const bookedVendorId = vendorId ?? pickedVendorId;
 
   const [providerType, setProviderType] = useState<ProviderType>(vendorId ? 'vendor' : 'vendor');
   const [categoryId, setCategoryId] = useState<string>('');
@@ -91,6 +97,10 @@ const BookNowModal = ({
       toast.error(parsed.error.errors[0].message);
       return;
     }
+    if (providerType === 'vendor' && !bookedVendorId) {
+      toast.error('Pick a shop');
+      return;
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -107,7 +117,7 @@ const BookNowModal = ({
           .from('bookings')
           .insert({
             customer_id: user.id,
-            vendor_id: vendorId ?? null,
+            vendor_id: bookedVendorId,
             category_id: categoryId,
             scheduled_at: scheduledAt,
             address,
@@ -195,6 +205,25 @@ const BookNowModal = ({
                 <span className="font-semibold">Independent Provider</span>
                 <span className="text-xs text-muted-foreground">On-demand</span>
               </button>
+            </div>
+          )}
+
+          {/* Shop picker (only when no vendor preselected) */}
+          {!vendorId && providerType === 'vendor' && (
+            <div className="space-y-2">
+              <Label>Shop</Label>
+              <Select value={pickedVendorId} onValueChange={setPickedVendorId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={vendors.length ? 'Choose a shop' : 'No shops listed yet'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {vendors.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name}{v.neighborhood ? ` · ${v.neighborhood}` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 

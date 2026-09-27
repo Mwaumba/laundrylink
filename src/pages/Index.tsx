@@ -8,7 +8,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import VendorCard from '@/components/VendorCard';
 import BookNowButton from '@/components/BookNowButton';
-import { vendors } from '@/data/vendors';
+import { useVendors } from '@/hooks/useVendors';
 import { neighborhoods } from '@/data/neighborhoods';
 import heroImg from '@/assets/hero-laundry.jpg';
 
@@ -24,8 +24,11 @@ const Index = () => {
   const [neighborhood, setNeighborhood] = useState('');
   const [service, setService] = useState('');
   const navigate = useNavigate();
+  const { data: vendors = [] } = useVendors();
 
-  const featuredVendors = vendors.filter((v) => v.isFeatured).slice(0, 6);
+  // Fall back to the best rated vendors until an admin features some.
+  const featured = vendors.filter((v) => v.isFeatured);
+  const featuredVendors = (featured.length ? featured : vendors).slice(0, 6);
   const fastResponseVendors = vendors.filter((v) => v.responseMinutes <= 5).slice(0, 4);
   const topNeighborhoods = neighborhoods.slice(0, 8);
 
