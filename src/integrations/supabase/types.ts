@@ -448,6 +448,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          data: Json
+          id: string
+          kind: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          kind: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          data?: Json
+          id?: string
+          kind?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       neighborhoods: {
         Row: {
           created_at: string
@@ -972,6 +1008,7 @@ export type Database = {
           budget: number
           category_id: string
           created_at: string
+          distance_km: number
           expires_at: string
           id: string
           notes: string
@@ -979,6 +1016,7 @@ export type Database = {
           status: Database["public"]["Enums"]["job_request_status"]
         }[]
       }
+      rebroadcast_job: { Args: { _job_id: string }; Returns: Json }
       update_booking_status: {
         Args: {
           _booking_id: string

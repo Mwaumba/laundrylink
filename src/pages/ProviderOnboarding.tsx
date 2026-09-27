@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Loader2, MapPin } from 'lucide-react';
+import UseLocationButton from '@/components/UseLocationButton';
+import type { LatLng } from '@/lib/geo';
 import { supabase } from '@/integrations/supabase/client';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -31,6 +33,7 @@ const ProviderOnboarding = () => {
   const [bio, setBio] = useState('');
   const [neighborhood, setNeighborhood] = useState('');
   const [radius, setRadius] = useState(5);
+  const [baseLocation, setBaseLocation] = useState<LatLng | null>(null);
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -66,6 +69,8 @@ const ProviderOnboarding = () => {
           neighborhood,
           neighborhood_slug: neighborhood.toLowerCase().replace(/\s+/g, '-'),
           service_radius_km: radius,
+          base_lat: baseLocation?.lat ?? null,
+          base_lng: baseLocation?.lng ?? null,
           status: 'pending_approval',
         })
         .select('id')
@@ -121,6 +126,10 @@ const ProviderOnboarding = () => {
           <div className="space-y-2">
             <Label>Service radius (km)</Label>
             <Input type="number" min={1} max={50} value={radius} onChange={(e) => setRadius(Number(e.target.value))} />
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <UseLocationButton value={baseLocation} onChange={setBaseLocation} label="Set my base to where I am now" />
+              <span className="text-xs text-muted-foreground">You'll get jobs within {radius} km of here.</span>
+            </div>
           </div>
 
           <div className="space-y-2">

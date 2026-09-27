@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import BookNowButton from '@/components/BookNowButton';
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationBell from '@/components/NotificationBell';
 import { useUserRole, type UserRole } from '@/hooks/useUserRole';
 
 const NAV_BY_ROLE: Record<UserRole, { to: string; label: string }[]> = {
@@ -92,6 +93,7 @@ const Navbar = () => {
 
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
+          {userId && <NotificationBell userId={userId} />}
           {(role === 'guest' || role === 'customer') && (
             <BookNowButton size="sm" className="rounded-full bg-primary hover:bg-primary/90 shadow-sm" />
           )}
@@ -115,6 +117,7 @@ const Navbar = () => {
 
         {/* Mobile: Book Now stays visible */}
         <div className="flex items-center gap-1 md:hidden">
+          {userId && <NotificationBell userId={userId} />}
           {(role === 'guest' || role === 'customer') && (
             <BookNowButton size="sm" className="rounded-full bg-primary hover:bg-primary/90 h-9 px-3 text-xs" />
           )}
