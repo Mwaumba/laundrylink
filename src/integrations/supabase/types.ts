@@ -979,6 +979,7 @@ export type Database = {
           status: Database["public"]["Enums"]["job_request_status"]
         }[]
       }
+      rebroadcast_job: { Args: { _job_id: string }; Returns: Json }
       update_booking_status: {
         Args: {
           _booking_id: string

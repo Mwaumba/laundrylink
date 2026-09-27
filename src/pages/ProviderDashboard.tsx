@@ -120,7 +120,14 @@ const ProviderDashboard = () => {
     }
     const result = data as { ok: boolean; error?: string };
     if (!result.ok) {
-      toast.error(result.error === 'already_assigned' ? 'Sorry, another provider got it first.' : 'Could not accept');
+      const messages: Record<string, string> = {
+        already_assigned: 'Sorry, another provider got it first.',
+        job_expired: 'This job has expired.',
+      };
+      toast.error(messages[result.error ?? ''] ?? 'Could not accept');
+      if (result.error === 'already_assigned' || result.error === 'job_expired') {
+        setJobs((j) => j.filter((x) => x.id !== jobId));
+      }
     } else {
       toast.success('Job accepted!');
       setJobs((j) => j.filter((x) => x.id !== jobId));
