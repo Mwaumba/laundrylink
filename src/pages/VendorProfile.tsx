@@ -99,7 +99,16 @@ const VendorProfile = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <BookNowButton vendorId={vendor.id} vendorName={vendor.name} className="bg-cobalt text-cobalt-foreground hover:bg-cobalt/90" />
+              {vendor.isClaimed === false ? (
+                <a href="#contact">
+                  <Button size="sm" className="gap-1.5 bg-cobalt text-cobalt-foreground hover:bg-cobalt/90">
+                    <Phone className="h-4 w-4" />
+                    Contact shop
+                  </Button>
+                </a>
+              ) : (
+                <BookNowButton vendorId={vendor.id} vendorName={vendor.name} className="bg-cobalt text-cobalt-foreground hover:bg-cobalt/90" />
+              )}
               <Button variant="outline" size="sm" className="gap-1.5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
                 <Heart className="h-4 w-4" />
                 Save
@@ -221,9 +230,14 @@ const VendorProfile = () => {
           <div className="space-y-4">
             <div className="sticky top-24 space-y-4">
               {/* Contact Card */}
-              <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+              <div id="contact" className="scroll-mt-24 rounded-xl border border-border bg-card p-5 shadow-card">
                 <h3 className="text-lg font-display font-semibold text-foreground">Contact {vendor.name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{vendor.priceRange}</p>
+                {vendor.isClaimed === false && (
+                  <p className="mt-3 rounded-lg bg-muted px-3 py-2 text-sm text-muted-foreground">
+                    This shop isn't taking bookings through Laundry Link yet. Contact them directly.
+                  </p>
+                )}
 
                 {vendor.responseMinutes <= 5 && (
                   <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-cobalt/5 px-3 py-2 text-sm font-medium text-cobalt">
