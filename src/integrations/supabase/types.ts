@@ -972,6 +972,7 @@ export type Database = {
           budget: number
           category_id: string
           created_at: string
+          distance_km: number
           expires_at: string
           id: string
           notes: string

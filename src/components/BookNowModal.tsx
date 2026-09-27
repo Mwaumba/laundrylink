@@ -19,6 +19,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useServiceCategories } from '@/hooks/useServiceCategories';
 import { useVendors } from '@/hooks/useVendors';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import UseLocationButton from '@/components/UseLocationButton';
+import type { LatLng } from '@/lib/geo';
 
 type ProviderType = 'vendor' | 'independent';
 
@@ -61,6 +63,7 @@ const BookNowModal = ({
   const [categoryId, setCategoryId] = useState<string>('');
   const [scheduledAt, setScheduledAt] = useState('');
   const [address, setAddress] = useState('');
+  const [location, setLocation] = useState<LatLng | null>(null);
   const [notes, setNotes] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -121,6 +124,8 @@ const BookNowModal = ({
             category_id: categoryId,
             scheduled_at: scheduledAt,
             address,
+            lat: location?.lat ?? null,
+            lng: location?.lng ?? null,
             notes: notes || null,
             customer_name: customerName,
             customer_phone: customerPhone,
@@ -141,6 +146,8 @@ const BookNowModal = ({
             customer_id: user.id,
             category_id: categoryId,
             address,
+            lat: location?.lat ?? null,
+            lng: location?.lng ?? null,
             notes: notes || null,
             customer_name: customerName,
             customer_phone: customerPhone,
@@ -273,6 +280,12 @@ const BookNowModal = ({
               onChange={(e) => setAddress(e.target.value)}
               maxLength={300}
             />
+            <div className="flex flex-wrap items-center gap-2">
+              <UseLocationButton value={location} onChange={setLocation} label="I'm at this address" />
+              {providerType === 'independent' && !location && (
+                <span className="text-xs text-muted-foreground">Helps us send your job to providers nearby.</span>
+              )}
+            </div>
           </div>
 
           {/* Pickup/Delivery — only for vendor flow */}
