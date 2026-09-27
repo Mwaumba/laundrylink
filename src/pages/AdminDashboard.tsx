@@ -9,20 +9,78 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 import { vendors } from '@/data/vendors';
+import { useApprovalQueue, type PendingApplication } from '@/hooks/useApprovalQueue';
 
-const MOCK_PENDING_VENDORS = [
-  { id: 'p1', name: 'BlueSky Laundry', type: 'Laundry Shop', neighborhood: 'Westlands', submittedAt: '2026-03-08', email: 'info@bluesky.co.ke' },
-  { id: 'p2', name: 'FreshStart Cleaners', type: 'Dry Cleaner', neighborhood: 'Kilimani', submittedAt: '2026-03-09', email: 'hello@freshstart.co.ke' },
-  { id: 'p3', name: 'QuickWash Express', type: 'Pickup & Delivery', neighborhood: 'South B', submittedAt: '2026-03-10', email: 'order@quickwash.co.ke' },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  'laundry-shop': 'Laundry Shop',
+  'dry-cleaner': 'Dry Cleaner',
+  'ironing-service': 'Ironing Service',
+  'pickup-delivery': 'Pickup & Delivery',
+  'independent': 'Independent',
+  'independent-provider': 'Independent Provider',
+};
+
+const formatDate = (iso: string) => new Date(iso).toLocaleDateString('en-KE', { dateStyle: 'medium' });
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
+  const { items: pending, loading: pendingLoading, error: pendingError, review } = useApprovalQueue();
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<PendingApplication | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+
+  const decide = async (app: PendingApplication, approve: boolean, reason?: string) => {
+    setBusyId(app.id);
+    try {
+      await review(app, approve, reason);
+      toast.success(`${app.name} ${approve ? 'approved' : 'rejected'}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Could not update application');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const confirmReject = async () => {
+    if (!rejecting) return;
+    const app = rejecting;
+    setRejecting(null);
+    await decide(app, false, rejectReason.trim() || undefined);
+    setRejectReason('');
+  };
+
+  const reviewButtons = (v: PendingApplication) => (
+    <>
+      <Button
+        size="sm"
+        className="gap-1 bg-success hover:bg-success/90"
+        disabled={busyId === v.id}
+        onClick={() => decide(v, true)}
+      >
+        <CheckCircle className="h-3.5 w-3.5" /> Approve
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        className="gap-1 text-destructive"
+        disabled={busyId === v.id}
+        onClick={() => setRejecting(v)}
+      >
+        <XCircle className="h-3.5 w-3.5" /> Reject
+      </Button>
+    </>
+  );
 
   const stats = {
     totalVendors: vendors.length,
-    pendingApprovals: MOCK_PENDING_VENDORS.length,
+    pendingApprovals: pending.length,
     totalViews: vendors.reduce((a, v) => a + v.profileViews, 0),
     totalInquiries: vendors.reduce((a, v) => a + v.inquiries, 0),
     totalFavorites: vendors.reduce((a, v) => a + v.favorites, 0),
@@ -76,7 +134,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Recent pending */}
-            {MOCK_PENDING_VENDORS.length > 0 && (
+            {pending.length > 0 && (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 font-display">
@@ -85,16 +143,15 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {MOCK_PENDING_VENDORS.map((v) => (
+                    {pending.map((v) => (
                       <div key={v.id} className="flex items-center justify-between rounded-lg border border-border p-3">
                         <div>
                           <p className="font-medium text-foreground">{v.name}</p>
-                          <p className="text-sm text-muted-foreground">{v.type} · {v.neighborhood} · {v.submittedAt}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {[CATEGORY_LABELS[v.category] ?? v.category, v.neighborhood, formatDate(v.submitted_at)].filter(Boolean).join(' · ')}
+                          </p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" className="gap-1 bg-success hover:bg-success/90"><CheckCircle className="h-3.5 w-3.5" /> Approve</Button>
-                          <Button size="sm" variant="outline" className="gap-1 text-destructive"><XCircle className="h-3.5 w-3.5" /> Reject</Button>
-                        </div>
+                        <div className="flex gap-2">{reviewButtons(v)}</div>
                       </div>
                     ))}
                   </div>
@@ -107,37 +164,39 @@ const AdminDashboard = () => {
           <TabsContent value="approvals">
             <Card>
               <CardHeader>
-                <CardTitle className="font-display">Vendor Approval Queue</CardTitle>
+                <CardTitle className="font-display">Shop & Provider Approval Queue</CardTitle>
               </CardHeader>
               <CardContent>
-                {MOCK_PENDING_VENDORS.length === 0 ? (
+                {pendingError ? (
+                  <p className="py-12 text-center text-sm text-destructive">Could not load the approval queue: {pendingError}</p>
+                ) : pendingLoading ? (
+                  <p className="py-12 text-center text-sm text-muted-foreground">Loading applications…</p>
+                ) : pending.length === 0 ? (
                   <div className="py-12 text-center">
                     <CheckCircle className="mx-auto h-12 w-12 text-success" />
                     <p className="mt-3 font-medium text-foreground">All caught up!</p>
-                    <p className="text-sm text-muted-foreground">No pending vendor approvals</p>
+                    <p className="text-sm text-muted-foreground">No shops or providers waiting for approval</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {MOCK_PENDING_VENDORS.map((v) => (
+                    {pending.map((v) => (
                       <div key={v.id} className="rounded-xl border border-border p-4">
                         <div className="flex items-start justify-between">
                           <div>
                             <h3 className="font-display font-bold text-foreground">{v.name}</h3>
-                            <p className="text-sm text-muted-foreground">{v.email}</p>
+                            <p className="text-sm text-muted-foreground">{[v.email, v.phone].filter(Boolean).join(' · ')}</p>
                             <div className="mt-2 flex gap-2">
-                              <Badge variant="secondary">{v.type}</Badge>
-                              <Badge variant="outline"><MapPin className="mr-1 h-3 w-3" /> {v.neighborhood}</Badge>
+                              <Badge variant="secondary">{CATEGORY_LABELS[v.category] ?? v.category}</Badge>
+                              {v.neighborhood && (
+                                <Badge variant="outline"><MapPin className="mr-1 h-3 w-3" /> {v.neighborhood}</Badge>
+                              )}
                             </div>
                           </div>
                           <Badge variant="outline" className="text-warning">
-                            <Clock className="mr-1 h-3 w-3" /> Submitted {v.submittedAt}
+                            <Clock className="mr-1 h-3 w-3" /> Submitted {formatDate(v.submitted_at)}
                           </Badge>
                         </div>
-                        <div className="mt-4 flex gap-2">
-                          <Button size="sm" className="gap-1 bg-success hover:bg-success/90"><CheckCircle className="h-3.5 w-3.5" /> Approve</Button>
-                          <Button size="sm" variant="outline" className="gap-1 text-destructive"><XCircle className="h-3.5 w-3.5" /> Reject</Button>
-                          <Button size="sm" variant="ghost">View Details</Button>
-                        </div>
+                        <div className="mt-4 flex gap-2">{reviewButtons(v)}</div>
                       </div>
                     ))}
                   </div>
@@ -283,6 +342,29 @@ const AdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <AlertDialog open={!!rejecting} onOpenChange={(open) => { if (!open) { setRejecting(null); setRejectReason(''); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject {rejecting?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              They will be able to fix their application and submit it again. The reason is saved with the application.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Textarea
+            placeholder="Reason (optional), e.g. business permit photo is unreadable"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            maxLength={500}
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReject} className="bg-destructive hover:bg-destructive/90">
+              Reject
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

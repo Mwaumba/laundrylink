@@ -218,6 +218,10 @@ export type Database = {
           neighborhood_slug: string | null
           phone: string
           rating: number | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_at: string | null
           review_count: number | null
           service_radius_km: number | null
           status: Database["public"]["Enums"]["provider_status"]
@@ -242,6 +246,10 @@ export type Database = {
           neighborhood_slug?: string | null
           phone: string
           rating?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
           review_count?: number | null
           service_radius_km?: number | null
           status?: Database["public"]["Enums"]["provider_status"]
@@ -266,6 +274,10 @@ export type Database = {
           neighborhood_slug?: string | null
           phone?: string
           rating?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
           review_count?: number | null
           service_radius_km?: number | null
           status?: Database["public"]["Enums"]["provider_status"]
@@ -757,6 +769,10 @@ export type Database = {
           price_range: string | null
           profile_views: number | null
           rating: number | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          submitted_at: string | null
           response_minutes: number | null
           response_time: string | null
           review_count: number | null
@@ -800,6 +816,10 @@ export type Database = {
           price_range?: string | null
           profile_views?: number | null
           rating?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
           response_minutes?: number | null
           response_time?: string | null
           review_count?: number | null
@@ -843,6 +863,10 @@ export type Database = {
           price_range?: string | null
           profile_views?: number | null
           rating?: number | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          submitted_at?: string | null
           response_minutes?: number | null
           response_time?: string | null
           review_count?: number | null
@@ -910,12 +934,59 @@ export type Database = {
     }
     Functions: {
       accept_job_offer: { Args: { _offer_id: string }; Returns: Json }
+      admin_pending_applications: {
+        Args: never
+        Returns: {
+          category: string
+          email: string | null
+          id: string
+          kind: string
+          name: string
+          neighborhood: string | null
+          phone: string | null
+          submitted_at: string
+          user_id: string
+        }[]
+      }
+      admin_review_provider: {
+        Args: { _approve: boolean; _provider_id: string; _reason?: string }
+        Returns: Database["public"]["Enums"]["provider_status"]
+      }
+      admin_review_vendor: {
+        Args: { _approve: boolean; _reason?: string; _vendor_id: string }
+        Returns: Database["public"]["Enums"]["onboarding_status"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      is_app_request: { Args: never; Returns: boolean }
+      list_open_jobs: {
+        Args: never
+        Returns: {
+          approx_lat: number
+          approx_lng: number
+          budget: number
+          category_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          notes: string
+          scheduled_at: string
+          status: Database["public"]["Enums"]["job_request_status"]
+        }[]
+      }
+      update_booking_status: {
+        Args: {
+          _booking_id: string
+          _final_price?: number
+          _note?: string
+          _status: Database["public"]["Enums"]["booking_status"]
+        }
+        Returns: Json
       }
     }
     Enums: {
