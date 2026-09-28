@@ -114,13 +114,19 @@ const VendorCard = ({ vendor }: VendorCardProps) => {
             </div>
           </div>
 
-          <BookNowButton
-            size="sm"
-            fullWidth
-            vendorId={vendor.id}
-            vendorName={vendor.name}
-            className="rounded-full bg-primary hover:bg-primary/90"
-          />
+          {vendor.isClaimed === false ? (
+            <span className="flex h-9 w-full items-center justify-center rounded-full border border-border text-sm font-medium text-foreground">
+              Contact shop directly
+            </span>
+          ) : (
+            <BookNowButton
+              size="sm"
+              fullWidth
+              vendorId={vendor.id}
+              vendorName={vendor.name}
+              className="rounded-full bg-primary hover:bg-primary/90"
+            />
+          )}
         </div>
       </div>
     </Link>

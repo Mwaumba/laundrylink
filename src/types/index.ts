@@ -78,4 +78,6 @@ export interface Vendor {
   isFeatured: boolean;
   isVerified: boolean;
   joinedDate: string;
+  /** False for a shop an admin listed before its owner joined. It can't take bookings yet. */
+  isClaimed?: boolean;
 }

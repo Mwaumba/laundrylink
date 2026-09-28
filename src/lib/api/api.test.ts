@@ -38,7 +38,7 @@ describe('toVendor', () => {
         has_pickup: null, has_delivery: null, pickup_radius: null, neighborhoods_served: null,
         price_range: null, response_time: null, response_minutes: 0, profile_views: null,
         favorites_count: null, inquiries_count: null, images: null, is_featured: null,
-        is_verified: null, joined_date: null,
+        is_verified: null, joined_date: null, is_claimed: null,
       },
       [
         { vendor_id: 'v1', day: 'Tuesday', open_time: '08:00', close_time: '18:00', is_closed: false },
@@ -50,5 +50,6 @@ describe('toVendor', () => {
     expect(v.responseMinutes <= 5).toBe(false);
     expect(v.businessHours.map((h) => h.day)).toEqual(['Monday', 'Tuesday']);
     expect(hasCoordinates(v)).toBe(false);
+    expect(v.isClaimed).toBe(true);
   });
 });

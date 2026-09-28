@@ -13,7 +13,7 @@ export const PUBLIC_VENDOR_COLUMNS = [
   'email', 'website', 'rating', 'review_count', 'availability', 'service_tags',
   'has_pickup', 'has_delivery', 'pickup_radius', 'neighborhoods_served', 'price_range',
   'response_time', 'response_minutes', 'profile_views', 'favorites_count',
-  'inquiries_count', 'images', 'is_featured', 'is_verified', 'joined_date',
+  'inquiries_count', 'images', 'is_featured', 'is_verified', 'joined_date', 'is_claimed',
 ].join(', ');
 
 const BADGE_ICONS: Record<BadgeType, string> = {
@@ -32,7 +32,7 @@ type VendorRow = Pick<
   | 'email' | 'website' | 'rating' | 'review_count' | 'availability' | 'service_tags'
   | 'has_pickup' | 'has_delivery' | 'pickup_radius' | 'neighborhoods_served' | 'price_range'
   | 'response_time' | 'response_minutes' | 'profile_views' | 'favorites_count'
-  | 'inquiries_count' | 'images' | 'is_featured' | 'is_verified' | 'joined_date'
+  | 'inquiries_count' | 'images' | 'is_featured' | 'is_verified' | 'joined_date' | 'is_claimed'
 >;
 type HoursRow = Pick<Tables<'business_hours'>, 'vendor_id' | 'day' | 'open_time' | 'close_time' | 'is_closed'>;
 type BadgeRow = Pick<Tables<'vendor_badges'>, 'vendor_id' | 'type' | 'label'>;
@@ -96,6 +96,8 @@ export function toVendor(
     isFeatured: !!row.is_featured,
     isVerified: !!row.is_verified,
     joinedDate: row.joined_date ?? '',
+    // Listed by an admin before the owner joined: shown, but not bookable.
+    isClaimed: row.is_claimed !== false,
   };
 }
 

@@ -55,7 +55,9 @@ const BookNowModal = ({
   const navigate = useNavigate();
   const { categories } = useServiceCategories();
   // Only needed to pick a shop when the modal was opened without one.
-  const { data: vendors = [] } = useVendors();
+  const { data: allVendors = [] } = useVendors();
+  // Shops listed before their owner joined can't accept bookings yet.
+  const vendors = allVendors.filter((v) => v.isClaimed !== false);
   const [pickedVendorId, setPickedVendorId] = useState('');
   const bookedVendorId = vendorId ?? pickedVendorId;
 
